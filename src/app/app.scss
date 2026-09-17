@@ -1,0 +1,97 @@
+:host {
+  color: #16324f;
+  display: block;
+  min-height: 100dvh;
+}
+
+.app-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  align-items: center;
+  backdrop-filter: blur(16px);
+  background: rgb(255 255 255 / 88%);
+  border-bottom: 1px solid rgb(22 50 79 / 8%);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 1rem clamp(1rem, 3vw, 2rem);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  align-items: center;
+  color: inherit;
+  display: inline-flex;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.brand strong {
+  display: block;
+  font-size: 1.1rem;
+}
+
+.brand__badge {
+  align-items: center;
+  background: linear-gradient(135deg, #1cd86f, #0faa58);
+  border-radius: 1rem;
+  box-shadow: 0 10px 24px rgb(28 216 111 / 24%);
+  color: white;
+  display: inline-flex;
+  font-size: 1.1rem;
+  height: 2.75rem;
+  justify-content: center;
+  width: 2.75rem;
+}
+
+.brand__tag {
+  color: #597089;
+  display: block;
+  font-size: 0.85rem;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+nav a {
+  border-radius: 999px;
+  color: #31506d;
+  font-weight: 600;
+  padding: 0.7rem 1rem;
+  text-decoration: none;
+}
+
+nav a:hover,
+nav a:focus-visible,
+nav a.is-active {
+  background: #e9fff1;
+  color: #0f8a47;
+  outline: none;
+}
+
+main {
+  flex: 1;
+}
+
+.footer {
+  color: #597089;
+  font-size: 0.95rem;
+  padding: 1rem clamp(1rem, 3vw, 2rem) 2rem;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
