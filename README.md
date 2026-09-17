@@ -50,7 +50,7 @@ This repository does **not** include real Firebase credentials.
 1. Create or open a Firebase project in the [Firebase console](https://console.firebase.google.com/).
 2. Add a Web app to the project.
 3. Copy the Firebase web configuration values.
-4. Update `/home/runner/work/bask-learning-app/bask-learning-app/src/environments/environment.ts`:
+4. Update `src/environments/environment.ts`:
 
 ```ts
 export const environment = {

@@ -28,6 +28,7 @@ export class LessonPlayerComponent {
     Math.round((this.currentIndex() / this.lesson.challenges.length) * 100),
   );
   readonly isComplete = computed(() => this.currentIndex() >= this.lesson.challenges.length);
+  readonly earnedXp = signal(0);
   readonly summaryMessage = computed(() =>
     this.correctAnswers() === this.totalQuizQuestions
       ? 'Perfect run! You nailed the demo lesson.'
@@ -76,11 +77,13 @@ export class LessonPlayerComponent {
     }
 
     this.lessonCompletionRecorded = true;
-    this.learnerProgressService.recordLessonCompletion(
-      this.lesson.id,
-      this.lesson.title,
-      this.lesson.challenges.length,
-      this.correctAnswers(),
+    this.earnedXp.set(
+      this.learnerProgressService.recordLessonCompletion(
+        this.lesson.id,
+        this.lesson.title,
+        this.lesson.challenges.length,
+        this.correctAnswers(),
+      ),
     );
   }
 }

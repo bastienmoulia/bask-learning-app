@@ -55,10 +55,11 @@ export class LearnerProgressService {
     const currentProgress = this.progress();
     const existingSummary = currentProgress.lessonSummaries[lessonId];
     const lastPlayedAt = new Date().toISOString();
+    const xpAward = existingSummary ? 0 : 15;
     const updatedProgress: LearnerDashboardProgress = {
       ...currentProgress,
       streakDays: Math.max(currentProgress.streakDays, 1),
-      totalXp: currentProgress.totalXp + 15,
+      totalXp: currentProgress.totalXp + xpAward,
       lessonsCompleted: existingSummary
         ? currentProgress.lessonsCompleted
         : currentProgress.lessonsCompleted + 1,
@@ -76,6 +77,8 @@ export class LearnerProgressService {
     };
 
     this.persist(updatedProgress);
+
+    return xpAward;
   }
 
   private loadProgress(): LearnerDashboardProgress {
