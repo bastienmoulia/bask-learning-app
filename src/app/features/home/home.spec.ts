@@ -28,4 +28,16 @@ describe('HomeComponent', () => {
     expect(element.textContent).toContain('Start the first lesson');
     expect(element.textContent).toContain('Basque greetings');
   });
+
+  it('starts a demo learner only after the user asks for it', () => {
+    const element = fixture.nativeElement as HTMLElement;
+    const button = element.querySelector('.panel-card__action') as HTMLButtonElement;
+
+    expect(component['learner']()).toBeNull();
+
+    button.click();
+    fixture.detectChanges();
+
+    expect(component['learner']()?.displayName).toBe('Guest explorer');
+  });
 });

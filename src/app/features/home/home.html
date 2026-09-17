@@ -26,8 +26,23 @@
   <aside class="hero__panel" aria-label="Learner overview">
     <div class="panel-card">
       <p class="panel-card__label">Current learner</p>
-      <strong>{{ learner()?.displayName }}</strong>
-      <span>{{ firebaseStatus() }}</span>
+      <strong>{{ learner()?.displayName ?? 'Not started yet' }}</strong>
+      <span>
+        {{
+          learner()
+            ? firebaseStatus()
+            : 'Choose demo mode now, or add Firebase settings later for live services.'
+        }}
+      </span>
+      @if (!learner()) {
+        <button
+          class="button button--secondary panel-card__action"
+          type="button"
+          (click)="startDemoMode()"
+        >
+          Continue in demo mode
+        </button>
+      }
     </div>
     <div class="panel-card panel-card--accent">
       <p class="panel-card__label">Next up</p>

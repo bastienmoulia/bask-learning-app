@@ -1,7 +1,9 @@
-import { FirebaseApp, FirebaseOptions, getApp, getApps, initializeApp } from 'firebase/app';
+import { FirebaseApp, FirebaseOptions, getApps, initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
 import { environment } from '../../../environments/environment';
+
+export const defaultFirebaseAppName = '[DEFAULT]';
 
 const requiredFirebaseKeys: (keyof FirebaseOptions)[] = [
   'apiKey',
@@ -21,8 +23,11 @@ export function hasFirebaseConfig(config: Partial<FirebaseOptions>): config is F
   return requiredFirebaseKeys.every((key) => Boolean(config[key]?.toString().trim()));
 }
 
-export function getFirebaseServices(): FirebaseServices {
-  if (!hasFirebaseConfig(environment.firebase)) {
+export function getFirebaseServices(
+  config: Partial<FirebaseOptions> = environment.firebase,
+  appName = defaultFirebaseAppName,
+): FirebaseServices {
+  if (!hasFirebaseConfig(config)) {
     return {
       app: null,
       auth: null,
@@ -31,7 +36,10 @@ export function getFirebaseServices(): FirebaseServices {
     };
   }
 
-  const app = getApps().length ? getApp() : initializeApp(environment.firebase);
+  const existingApp = getApps().find((app) => app.name === appName);
+  const app =
+    existingApp ??
+    (appName === defaultFirebaseAppName ? initializeApp(config) : initializeApp(config, appName));
 
   return {
     app,

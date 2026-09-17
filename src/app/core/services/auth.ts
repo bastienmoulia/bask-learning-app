@@ -3,6 +3,14 @@ import { getFirebaseServices } from '../firebase/firebase';
 
 const demoLearnerStorageKey = 'bask.demoLearner';
 
+function createGuestId() {
+  if (typeof globalThis.crypto?.randomUUID === 'function') {
+    return globalThis.crypto.randomUUID();
+  }
+
+  return `guest-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 export interface LearnerSession {
   id: string;
   displayName: string;
@@ -28,7 +36,7 @@ export class AuthService {
     }
 
     const learner: LearnerSession = {
-      id: crypto.randomUUID(),
+      id: createGuestId(),
       displayName: 'Guest explorer',
       mode: this.firebase.isConfigured ? 'firebase-ready' : 'demo',
     };

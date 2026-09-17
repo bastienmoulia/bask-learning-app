@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject, OnInit } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth';
 import { LearnerProgressService } from '../../core/services/learner-progress';
@@ -12,7 +12,7 @@ import { starterLesson } from '../lesson-player/starter-lesson';
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent {
   private readonly authService = inject(AuthService);
   private readonly learnerProgressService = inject(LearnerProgressService);
 
@@ -25,7 +25,7 @@ export class HomeComponent implements OnInit {
     () => this.progress().lessonSummaries[this.starterLesson.id] ?? null,
   );
 
-  ngOnInit() {
+  protected startDemoMode() {
     this.authService.continueAsGuest();
   }
 }
