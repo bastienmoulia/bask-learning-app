@@ -21,10 +21,8 @@ Bask is an Angular MVP for learning Basque from scratch with a playful, Duolingo
 Install dependencies:
 
 ```bash
-npm install --legacy-peer-deps
+npm install
 ```
-
-> Note: `--legacy-peer-deps` is currently the most reliable install path with this Angular/Vitest dependency set in this environment.
 
 Start the development server:
 
