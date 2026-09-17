@@ -42,4 +42,22 @@ describe('LessonPlayerComponent', () => {
     expect(learnerProgressService.progress().lessonsCompleted).toBe(1);
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('Lesson complete');
   });
+
+  it('does not record completion twice after the lesson is already finished', () => {
+    component.flipFlashcard();
+    component.advanceFlashcard();
+    component.flipFlashcard();
+    component.advanceFlashcard();
+    component.chooseOption('Thank you very much');
+    component.moveToNextQuestion();
+    component.chooseOption('Kaixo');
+    component.moveToNextQuestion();
+
+    component.moveToNextQuestion();
+    component.advanceFlashcard();
+
+    expect(component.currentIndex()).toBe(component.lesson.challenges.length);
+    expect(learnerProgressService.progress().lessonsCompleted).toBe(1);
+    expect(learnerProgressService.progress().totalXp).toBe(15);
+  });
 });

@@ -8,6 +8,7 @@ import { starterLesson } from '../lesson-player/starter-lesson';
 @Component({
   selector: 'app-home',
   imports: [RouterLink, DatePipe],
+  standalone: true,
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })

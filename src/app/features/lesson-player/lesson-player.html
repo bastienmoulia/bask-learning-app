@@ -26,7 +26,13 @@
       <h2>{{ challenge.prompt }}</h2>
 
       @if (challenge.type === 'flashcard') {
-        <button class="flashcard" type="button" (click)="flipFlashcard()">
+        <button
+          class="flashcard"
+          type="button"
+          [attr.aria-describedby]="'flashcard-status-' + challenge.id"
+          [attr.aria-pressed]="revealAnswer()"
+          (click)="flipFlashcard()"
+        >
           <span class="flashcard__label">Basque</span>
           <strong>{{ challenge.basque }}</strong>
           @if (revealAnswer()) {
@@ -34,6 +40,13 @@
           } @else {
             <span class="flashcard__hint">Tap to reveal the English translation</span>
           }
+          <span class="sr-only" [id]="'flashcard-status-' + challenge.id">
+            {{
+              revealAnswer()
+                ? 'Translation revealed. Activate continue to move to the next card.'
+                : 'Translation hidden. Activate to reveal the English translation.'
+            }}
+          </span>
         </button>
 
         <button

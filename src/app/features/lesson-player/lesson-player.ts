@@ -6,6 +6,7 @@ import { LessonChallenge, starterLesson } from './starter-lesson';
 @Component({
   selector: 'app-lesson-player',
   imports: [RouterLink],
+  standalone: true,
   templateUrl: './lesson-player.html',
   styleUrl: './lesson-player.scss',
 })
@@ -36,6 +37,10 @@ export class LessonPlayerComponent {
   );
 
   advanceFlashcard() {
+    if (this.isComplete()) {
+      return;
+    }
+
     this.revealAnswer.set(false);
     this.currentIndex.update((index) => index + 1);
     this.maybeRecordCompletion();
@@ -60,6 +65,10 @@ export class LessonPlayerComponent {
   }
 
   moveToNextQuestion() {
+    if (this.isComplete()) {
+      return;
+    }
+
     this.selectedOption.set(null);
     this.currentIndex.update((index) => index + 1);
     this.maybeRecordCompletion();
