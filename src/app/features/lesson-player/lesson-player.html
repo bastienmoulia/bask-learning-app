@@ -1,0 +1,124 @@
+<section class="lesson-shell">
+  <header class="lesson-header">
+    <a class="back-link" routerLink="/">← Back to dashboard</a>
+    <span class="lesson-badge">{{ lesson.level }}</span>
+    <h1>{{ lesson.title }}</h1>
+    <p>{{ lesson.description }}</p>
+    <p class="demo-note">{{ lesson.demoLabel }}</p>
+  </header>
+
+  <div
+    class="progress-bar"
+    aria-label="Lesson progress"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    [attr.aria-valuenow]="progressPercent()"
+    role="progressbar"
+  >
+    <span [style.width.%]="progressPercent()"></span>
+  </div>
+
+  @if (!isComplete() && currentChallenge(); as challenge) {
+    <article class="challenge-card">
+      <p class="challenge-card__eyebrow">
+        Step {{ currentIndex() + 1 }} of {{ lesson.challenges.length }}
+      </p>
+      <h2>{{ challenge.prompt }}</h2>
+
+      @if (challenge.type === 'flashcard') {
+        <button
+          class="flashcard"
+          type="button"
+          [attr.aria-describedby]="'flashcard-status-' + challenge.id"
+          [attr.aria-pressed]="revealAnswer()"
+          (click)="flipFlashcard()"
+        >
+          <span class="flashcard__label">Basque</span>
+          <strong>{{ challenge.basque }}</strong>
+          @if (revealAnswer()) {
+            <span class="flashcard__translation">English: {{ challenge.english }}</span>
+          } @else {
+            <span class="flashcard__hint">Tap to reveal the English translation</span>
+          }
+          <span class="sr-only" [id]="'flashcard-status-' + challenge.id">
+            {{
+              revealAnswer()
+                ? 'Translation revealed. Activate continue to move to the next card.'
+                : 'Translation hidden. Activate to reveal the English translation.'
+            }}
+          </span>
+        </button>
+
+        <button
+          class="primary-action"
+          type="button"
+          [disabled]="!revealAnswer()"
+          (click)="advanceFlashcard()"
+        >
+          Continue
+        </button>
+      } @else {
+        <p class="question">{{ challenge.question }}</p>
+        <ul class="answers">
+          @for (option of challenge.options; track option) {
+            <li>
+              <button
+                type="button"
+                class="answer"
+                [class.answer--correct]="selectedOption() && isCorrectOption(option)"
+                [class.answer--selected]="selectedOption() === option"
+                [class.answer--muted]="
+                  selectedOption() && selectedOption() !== option && !isCorrectOption(option)
+                "
+                (click)="chooseOption(option)"
+              >
+                {{ option }}
+              </button>
+            </li>
+          }
+        </ul>
+
+        @if (selectedOption()) {
+          <div class="feedback" [class.feedback--success]="isCorrectOption(selectedOption()!)">
+            <strong>
+              {{ isCorrectOption(selectedOption()!) ? 'Correct!' : 'Not quite this time.' }}
+            </strong>
+            <p>{{ challenge.explanation }}</p>
+          </div>
+
+          <button class="primary-action" type="button" (click)="moveToNextQuestion()">
+            {{
+              currentIndex() + 1 === lesson.challenges.length ? 'Finish lesson' : 'Next challenge'
+            }}
+          </button>
+        }
+      }
+    </article>
+  } @else {
+    <article class="challenge-card challenge-card--complete">
+      <span class="lesson-badge">Lesson complete</span>
+      <h2>Oso ondo! Great start.</h2>
+      <p>{{ summaryMessage() }}</p>
+
+      <dl class="summary-grid">
+        <div>
+          <dt>Steps completed</dt>
+          <dd>{{ lesson.challenges.length }}</dd>
+        </div>
+        <div>
+          <dt>Quiz score</dt>
+          <dd>{{ correctAnswers() }}/{{ totalQuizQuestions }}</dd>
+        </div>
+        <div>
+          <dt>XP earned</dt>
+          <dd>{{ earnedXp() }}</dd>
+        </div>
+      </dl>
+
+      <div class="completion-actions">
+        <a class="secondary-action" routerLink="/">Return to dashboard</a>
+        <a class="primary-link" routerLink="/lesson/starter-basque-greetings">Replay lesson</a>
+      </div>
+    </article>
+  }
+</section>

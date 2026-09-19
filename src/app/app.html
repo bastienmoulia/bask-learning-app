@@ -1,0 +1,28 @@
+<div class="app-shell">
+  <header class="topbar">
+    <a class="brand" routerLink="/">
+      <span class="brand__badge" aria-hidden="true">🟢</span>
+      <span>
+        <strong>Bask</strong>
+        <span class="brand__tag">Basque from zero, one win at a time</span>
+      </span>
+    </a>
+
+    <nav aria-label="Primary">
+      <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
+        Dashboard
+      </a>
+      <a routerLink="/lesson/starter-basque-greetings" routerLinkActive="is-active">
+        First lesson
+      </a>
+    </nav>
+  </header>
+
+  <main>
+    <router-outlet />
+  </main>
+
+  <footer class="footer">
+    <p>Demo MVP for learning Basque with short lessons, streaks, and playful practice.</p>
+  </footer>
+</div>

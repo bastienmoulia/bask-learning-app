@@ -1,0 +1,124 @@
+<section class="hero">
+  <div class="hero__copy">
+    <span class="hero__eyebrow">Playful language learning · MVP demo</span>
+    <h1>Learn Basque from scratch through tiny wins, games, and streaks.</h1>
+    <p>
+      Bask is a Duolingo-inspired starter app for absolute beginners. The current MVP includes a
+      polished dashboard, a short demo lesson, and Firebase-ready hooks for auth and learner
+      progress.
+    </p>
+
+    <div class="hero__actions">
+      <a class="button button--primary" routerLink="/lesson/starter-basque-greetings">
+        Start the first lesson
+      </a>
+      <a class="button button--secondary" href="#mvp-overview">See MVP scope</a>
+    </div>
+
+    <ul class="hero__chips" aria-label="Product highlights">
+      <li>Short lessons</li>
+      <li>Friendly streaks</li>
+      <li>Starter demo content</li>
+      <li>Firebase-ready</li>
+    </ul>
+  </div>
+
+  <aside class="hero__panel" aria-label="Learner overview">
+    <div class="panel-card">
+      <p class="panel-card__label">Current learner</p>
+      <strong>{{ learner()?.displayName ?? 'Not started yet' }}</strong>
+      <span>
+        {{
+          learner()
+            ? firebaseStatus()
+            : 'Choose demo mode now, or add Firebase settings later for live services.'
+        }}
+      </span>
+      @if (!learner()) {
+        <button
+          class="button button--secondary panel-card__action"
+          type="button"
+          (click)="startDemoMode()"
+        >
+          Continue in demo mode
+        </button>
+      }
+    </div>
+    <div class="panel-card panel-card--accent">
+      <p class="panel-card__label">Next up</p>
+      <strong>{{ starterLesson.title }}</strong>
+      <span>{{ starterLesson.estimatedMinutes }} minutes · {{ starterLesson.level }}</span>
+    </div>
+  </aside>
+</section>
+
+<section class="stats-grid" aria-label="Progress highlights">
+  <article>
+    <span>🔥 Streak</span>
+    <strong>{{ progress().streakDays }} days</strong>
+    <p>Daily practice becomes a habit with simple, bite-sized sessions.</p>
+  </article>
+  <article>
+    <span>⭐ XP</span>
+    <strong>{{ progress().totalXp }}</strong>
+    <p>Earn points as you complete demo lessons and future challenge types.</p>
+  </article>
+  <article>
+    <span>🧭 Path</span>
+    <strong>{{ progress().currentPathLabel }}</strong>
+    <p>The first learning path starts with greetings and everyday basics.</p>
+  </article>
+  <article>
+    <span>📈 Demo progress</span>
+    <strong>{{ completionRate() }}%</strong>
+    <p>Local progress works now and can later sync to Firebase-backed accounts.</p>
+  </article>
+</section>
+
+<section class="dashboard-grid" id="mvp-overview">
+  <article class="card">
+    <h2>Starter lesson path</h2>
+    <p>{{ starterLesson.description }}</p>
+    <ul>
+      <li>Flashcards for “Kaixo” and “Agur”</li>
+      <li>Two quick multiple-choice checks</li>
+      <li>Completion summary stored locally for the MVP</li>
+    </ul>
+    <p class="demo-note">{{ starterLesson.demoLabel }}</p>
+  </article>
+
+  <article class="card">
+    <h2>Progress snapshot</h2>
+    @if (progressSummary(); as lessonProgress) {
+      <dl>
+        <div>
+          <dt>Completed</dt>
+          <dd>{{ lessonProgress.stepsCompleted }}/{{ lessonProgress.totalSteps }} steps</dd>
+        </div>
+        <div>
+          <dt>Best score</dt>
+          <dd>{{ lessonProgress.bestScore }} correct answers</dd>
+        </div>
+        <div>
+          <dt>Last practiced</dt>
+          <dd>{{ lessonProgress.lastPlayedAt | date: 'medium' }}</dd>
+        </div>
+      </dl>
+    } @else {
+      <p>Start the first demo lesson to see your local progress and streak update here.</p>
+    }
+  </article>
+
+  <article class="card">
+    <h2>Firebase-ready foundation</h2>
+    <p>
+      Environment placeholders are ready for Firebase config. Until credentials are added, the app
+      stays runnable in safe demo mode with no secrets committed.
+    </p>
+    <ul>
+      <li>Guest learner session for local exploration</li>
+      <li>Progress persistence abstraction ready for backend sync</li>
+      <li>No production auth or analytics in this MVP</li>
+    </ul>
+  </article>
+</section>

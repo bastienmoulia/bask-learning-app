@@ -1,0 +1,185 @@
+:host {
+  display: block;
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+section {
+  margin: 0 auto 1.5rem;
+  max-width: 1120px;
+}
+
+.hero {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+}
+
+.hero__copy,
+.card,
+.panel-card,
+.stats-grid article {
+  background: white;
+  border: 1px solid rgb(22 50 79 / 8%);
+  border-radius: 28px;
+  box-shadow: 0 18px 36px rgb(22 50 79 / 8%);
+}
+
+.hero__copy {
+  padding: clamp(1.5rem, 4vw, 3rem);
+}
+
+.hero__copy h1 {
+  font-size: clamp(2.4rem, 4vw, 4.25rem);
+  line-height: 1;
+  margin: 0.5rem 0 1rem;
+}
+
+.hero__copy p,
+.card p,
+.stats-grid p,
+.panel-card span,
+li,
+dd {
+  color: #597089;
+}
+
+.hero__eyebrow,
+.panel-card__label,
+.stats-grid span {
+  color: #0f8a47;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hero__actions,
+.hero__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.hero__actions {
+  margin: 1.5rem 0;
+}
+
+.hero__chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hero__chips li {
+  background: #eef6ff;
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.7rem 0.95rem;
+}
+
+.button {
+  border-radius: 999px;
+  display: inline-flex;
+  font-weight: 700;
+  padding: 0.95rem 1.25rem;
+  text-decoration: none;
+}
+
+.button--primary {
+  background: linear-gradient(135deg, #1cd86f, #0f8a47);
+  box-shadow: 0 12px 20px rgb(15 138 71 / 26%);
+  color: white;
+}
+
+.button--secondary {
+  background: #eef6ff;
+  color: #23415e;
+}
+
+.hero__panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.panel-card {
+  display: grid;
+  gap: 0.4rem;
+  padding: 1.25rem;
+}
+
+.panel-card strong {
+  font-size: 1.25rem;
+}
+
+.panel-card__action {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  justify-self: start;
+}
+
+.panel-card--accent {
+  background: linear-gradient(160deg, #f1fff6, #fef7dd);
+}
+
+.stats-grid,
+.dashboard-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.stats-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.stats-grid article,
+.card {
+  padding: 1.25rem;
+}
+
+.stats-grid strong {
+  display: block;
+  font-size: 1.8rem;
+  margin: 0.4rem 0 0.75rem;
+}
+
+.dashboard-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+.card ul {
+  margin: 1rem 0;
+  padding-left: 1.25rem;
+}
+
+dl {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0 0;
+}
+
+dt {
+  font-weight: 700;
+}
+
+dd {
+  margin: 0.35rem 0 0;
+}
+
+.demo-note {
+  background: #fff6da;
+  border-radius: 18px;
+  padding: 0.85rem 1rem;
+}
+
+@media (max-width: 960px) {
+  .hero,
+  .stats-grid,
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
