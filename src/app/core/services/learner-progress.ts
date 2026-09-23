@@ -1,6 +1,7 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { AuthService } from './auth';
 
-const learnerProgressStorageKey = 'bask.learnerProgress';
+const learnerProgressStorageKeyPrefix = 'bask.learnerProgress';
 
 export interface LessonCompletionSummary {
   lessonId: string;
@@ -23,7 +24,8 @@ export interface LearnerDashboardProgress {
   providedIn: 'root',
 })
 export class LearnerProgressService {
-  private readonly progressSignal = signal<LearnerDashboardProgress>(this.loadProgress());
+  private readonly authService = inject(AuthService);
+  private readonly progressSignal = signal<LearnerDashboardProgress>(createEmptyProgress());
 
   readonly progress = this.progressSignal.asReadonly();
   readonly completionRate = computed(() => {
@@ -46,12 +48,22 @@ export class LearnerProgressService {
     return Math.round((completedSteps / totalSteps) * 100);
   });
 
+  constructor() {
+    effect(() => {
+      this.progressSignal.set(this.loadProgress(this.authService.learner()?.id ?? null));
+    });
+  }
+
   recordLessonCompletion(
     lessonId: string,
     title: string,
     totalSteps: number,
     correctAnswers: number,
   ) {
+    if (!this.authService.learner()) {
+      return 0;
+    }
+
     const currentProgress = this.progress();
     const existingSummary = currentProgress.lessonSummaries[lessonId];
     const lastPlayedAt = new Date().toISOString();
@@ -81,35 +93,49 @@ export class LearnerProgressService {
     return xpAward;
   }
 
-  private loadProgress(): LearnerDashboardProgress {
-    const rawProgress = localStorage.getItem(learnerProgressStorageKey);
+  private loadProgress(learnerId: string | null): LearnerDashboardProgress {
+    const storageKey = this.getStorageKey(learnerId);
+
+    if (!storageKey) {
+      return createEmptyProgress();
+    }
+
+    const rawProgress = localStorage.getItem(storageKey);
 
     if (!rawProgress) {
-      return {
-        streakDays: 0,
-        totalXp: 0,
-        lessonsCompleted: 0,
-        currentPathLabel: 'Basque basics',
-        lessonSummaries: {},
-      };
+      return createEmptyProgress();
     }
 
     try {
       return JSON.parse(rawProgress) as LearnerDashboardProgress;
     } catch {
-      localStorage.removeItem(learnerProgressStorageKey);
-      return {
-        streakDays: 0,
-        totalXp: 0,
-        lessonsCompleted: 0,
-        currentPathLabel: 'Basque basics',
-        lessonSummaries: {},
-      };
+      localStorage.removeItem(storageKey);
+      return createEmptyProgress();
     }
   }
 
   private persist(progress: LearnerDashboardProgress) {
-    localStorage.setItem(learnerProgressStorageKey, JSON.stringify(progress));
+    const storageKey = this.getStorageKey(this.authService.learner()?.id ?? null);
+
+    if (!storageKey) {
+      return;
+    }
+
+    localStorage.setItem(storageKey, JSON.stringify(progress));
     this.progressSignal.set(progress);
   }
+
+  private getStorageKey(learnerId: string | null) {
+    return learnerId ? `${learnerProgressStorageKeyPrefix}:${learnerId}` : null;
+  }
+}
+
+function createEmptyProgress(): LearnerDashboardProgress {
+  return {
+    streakDays: 0,
+    totalXp: 0,
+    lessonsCompleted: 0,
+    currentPathLabel: 'Basque basics',
+    lessonSummaries: {},
+  };
 }

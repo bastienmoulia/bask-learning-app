@@ -3,9 +3,8 @@
     <span class="hero__eyebrow">Playful language learning · MVP demo</span>
     <h1>Learn Basque from scratch through tiny wins, games, and streaks.</h1>
     <p>
-      Bask is a Duolingo-inspired starter app for absolute beginners. The current MVP includes a
-      polished dashboard, a short demo lesson, and Firebase-ready hooks for auth and learner
-      progress.
+      Bask is a Duolingo-inspired starter app for absolute beginners. Sign in with Firebase to keep
+      your lessons under your own learner identity.
     </p>
 
     <div class="hero__actions">
@@ -26,23 +25,8 @@
   <aside class="hero__panel" aria-label="Learner overview">
     <div class="panel-card">
       <p class="panel-card__label">Current learner</p>
-      <strong>{{ learner()?.displayName ?? 'Not started yet' }}</strong>
-      <span>
-        {{
-          learner()
-            ? firebaseStatus()
-            : 'Choose demo mode now, or add Firebase settings later for live services.'
-        }}
-      </span>
-      @if (!learner()) {
-        <button
-          class="button button--secondary panel-card__action"
-          type="button"
-          (click)="startDemoMode()"
-        >
-          Continue in demo mode
-        </button>
-      }
+      <strong>{{ learner()?.displayName ?? 'Learner' }}</strong>
+      <span>{{ learner()?.email ?? 'Signed in with a Firebase provider' }}</span>
     </div>
     <div class="panel-card panel-card--accent">
       <p class="panel-card__label">Next up</p>
@@ -71,7 +55,7 @@
   <article>
     <span>📈 Demo progress</span>
     <strong>{{ completionRate() }}%</strong>
-    <p>Local progress works now and can later sync to Firebase-backed accounts.</p>
+    <p>Local progress stays separated by Firebase account on this device.</p>
   </article>
 </section>
 
@@ -82,7 +66,7 @@
     <ul>
       <li>Flashcards for “Kaixo” and “Agur”</li>
       <li>Two quick multiple-choice checks</li>
-      <li>Completion summary stored locally for the MVP</li>
+      <li>Completion summary stored locally per authenticated learner</li>
     </ul>
     <p class="demo-note">{{ starterLesson.demoLabel }}</p>
   </article>
@@ -105,20 +89,20 @@
         </div>
       </dl>
     } @else {
-      <p>Start the first demo lesson to see your local progress and streak update here.</p>
+      <p>Start the first lesson to see your account-specific progress and streak update here.</p>
     }
   </article>
 
   <article class="card">
-    <h2>Firebase-ready foundation</h2>
+    <h2>Authenticated learning foundation</h2>
     <p>
-      Environment placeholders are ready for Firebase config. Until credentials are added, the app
-      stays runnable in safe demo mode with no secrets committed.
+      Firebase Authentication gates the lesson flow, restores sessions after restart, and keeps
+      local progress isolated between accounts on the same device.
     </p>
     <ul>
-      <li>Guest learner session for local exploration</li>
-      <li>Progress persistence abstraction ready for backend sync</li>
-      <li>No production auth or analytics in this MVP</li>
+      <li>Email/password, Google, and Apple sign-in options</li>
+      <li>Protected lesson access while auth state restores</li>
+      <li>Progress persistence abstraction ready for future backend sync</li>
     </ul>
   </article>
 </section>

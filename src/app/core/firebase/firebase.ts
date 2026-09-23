@@ -1,3 +1,4 @@
+import { InjectionToken } from '@angular/core';
 import { FirebaseApp, FirebaseOptions, getApps, initializeApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
@@ -18,6 +19,11 @@ export interface FirebaseServices {
   firestore: Firestore | null;
   isConfigured: boolean;
 }
+
+export const FIREBASE_SERVICES = new InjectionToken<FirebaseServices>('FIREBASE_SERVICES', {
+  providedIn: 'root',
+  factory: () => getFirebaseServices(),
+});
 
 export function hasFirebaseConfig(config: Partial<FirebaseOptions>): config is FirebaseOptions {
   return requiredFirebaseKeys.every((key) => Boolean(config[key]?.toString().trim()));

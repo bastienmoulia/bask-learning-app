@@ -1,5 +1,7 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { AuthService } from '../../core/services/auth';
 import { HomeComponent } from './home';
 
 describe('HomeComponent', () => {
@@ -10,7 +12,19 @@ describe('HomeComponent', () => {
     localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [HomeComponent],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        {
+          provide: AuthService,
+          useValue: {
+            learner: signal({
+              id: 'learner-123',
+              displayName: 'Ane learner',
+              email: 'ane@example.com',
+            }).asReadonly(),
+          },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HomeComponent);
@@ -22,22 +36,12 @@ describe('HomeComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('shows the starter lesson CTA', () => {
+  it('shows the starter lesson CTA and the signed-in learner', () => {
     const element = fixture.nativeElement as HTMLElement;
 
     expect(element.textContent).toContain('Start the first lesson');
     expect(element.textContent).toContain('Basque greetings');
-  });
-
-  it('starts a demo learner only after the user asks for it', () => {
-    const element = fixture.nativeElement as HTMLElement;
-    const button = element.querySelector('.panel-card__action') as HTMLButtonElement;
-
-    expect(component['learner']()).toBeNull();
-
-    button.click();
-    fixture.detectChanges();
-
-    expect(component['learner']()?.displayName).toBe('Guest explorer');
+    expect(element.textContent).toContain('Ane learner');
+    expect(element.textContent).toContain('ane@example.com');
   });
 });
