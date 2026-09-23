@@ -8,7 +8,7 @@ import { LessonChallenge, starterLesson } from './starter-lesson';
   imports: [RouterLink],
   standalone: true,
   templateUrl: './lesson-player.html',
-  styleUrl: './lesson-player.scss',
+  styleUrl: './lesson-player.css',
 })
 export class LessonPlayerComponent {
   private readonly learnerProgressService = inject(LearnerProgressService);

@@ -1,7 +1,7 @@
 :host {
   display: grid;
   min-height: 100%;
-  padding: clamp(1rem, 3vw, 2rem);
+  padding: var(--space-page);
 }
 
 .auth-shell {
@@ -12,10 +12,10 @@
 }
 
 .auth-card {
-  background: white;
-  border: 1px solid rgb(22 50 79 / 8%);
-  border-radius: 28px;
-  box-shadow: 0 18px 36px rgb(22 50 79 / 8%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
   display: grid;
   gap: 1rem;
   padding: clamp(1.5rem, 4vw, 2.5rem);
@@ -29,14 +29,14 @@
 
 .auth-card p,
 .auth-field span {
-  color: #597089;
+  color: var(--color-text-muted);
 }
 
 .auth-card__eyebrow {
-  color: #0f8a47;
-  font-size: 0.85rem;
+  color: var(--color-primary);
+  font-size: var(--font-size-eyebrow);
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--letter-spacing-eyebrow);
   text-transform: uppercase;
 }
 
@@ -46,8 +46,8 @@
 }
 
 .auth-field input {
-  border: 1px solid rgb(22 50 79 / 14%);
-  border-radius: 18px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
   font: inherit;
   padding: 0.9rem 1rem;
 }
@@ -64,7 +64,7 @@
 
 .button {
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   font: inherit;
   font-weight: 700;
@@ -78,39 +78,39 @@
 }
 
 .button--primary {
-  background: linear-gradient(135deg, #1cd86f, #0f8a47);
-  box-shadow: 0 12px 20px rgb(15 138 71 / 26%);
-  color: white;
+  background: var(--gradient-primary);
+  box-shadow: var(--shadow-primary);
+  color: var(--color-on-primary);
 }
 
 .button--secondary {
-  background: #eef6ff;
-  color: #23415e;
+  background: var(--color-surface-soft);
+  color: var(--color-text-secondary);
 }
 
 .button--ghost {
   background: transparent;
-  color: #31506d;
+  color: var(--color-text-tertiary);
   padding-inline: 0;
   text-align: left;
 }
 
 .auth-feedback {
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   padding: 0.9rem 1rem;
 }
 
 .auth-feedback--error {
-  background: #fff0ec;
-  color: #ab3b18;
+  background: var(--color-surface-error);
+  color: var(--color-error);
 }
 
 .auth-feedback--info {
-  background: #eef6ff;
-  color: #23415e;
+  background: var(--color-surface-soft);
+  color: var(--color-text-secondary);
 }
 
 .auth-feedback--success {
-  background: #effcf3;
-  color: #0f8a47;
+  background: var(--color-surface-success-muted);
+  color: var(--color-primary);
 }

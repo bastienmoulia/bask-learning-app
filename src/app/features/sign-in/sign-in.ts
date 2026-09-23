@@ -8,7 +8,7 @@ import { AuthService } from '../../core/services/auth';
   imports: [FormsModule],
   standalone: true,
   templateUrl: './sign-in.html',
-  styleUrl: './sign-in.scss',
+  styleUrl: './sign-in.css',
 })
 export class SignInComponent {
   private readonly authService = inject(AuthService);
