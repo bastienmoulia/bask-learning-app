@@ -9,13 +9,27 @@
     </a>
 
     <nav aria-label="Primary">
-      <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
-        Dashboard
-      </a>
-      <a routerLink="/lesson/starter-basque-greetings" routerLinkActive="is-active">
-        First lesson
-      </a>
+      @if (isSignedIn()) {
+        <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
+          Dashboard
+        </a>
+        <a routerLink="/lesson/starter-basque-greetings" routerLinkActive="is-active">
+          First lesson
+        </a>
+      } @else {
+        <a
+          routerLink="/sign-in"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          Sign in
+        </a>
+      }
     </nav>
+
+    @if (learner()) {
+      <button class="topbar__action" type="button" (click)="signOut()">Sign out</button>
+    }
   </header>
 
   <main>
@@ -23,6 +37,6 @@
   </main>
 
   <footer class="footer">
-    <p>Demo MVP for learning Basque with short lessons, streaks, and playful practice.</p>
+    <p>Bask pairs short lessons, streaks, and Firebase-backed sign-in for returning learners.</p>
   </footer>
 </div>

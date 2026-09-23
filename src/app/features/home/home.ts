@@ -18,14 +18,9 @@ export class HomeComponent {
 
   protected readonly progress = this.learnerProgressService.progress;
   protected readonly learner = this.authService.learner;
-  protected readonly firebaseStatus = this.authService.connectionLabel;
   protected readonly completionRate = this.learnerProgressService.completionRate;
   protected readonly starterLesson = starterLesson;
   protected readonly progressSummary = computed(
     () => this.progress().lessonSummaries[this.starterLesson.id] ?? null,
   );
-
-  protected startDemoMode() {
-    this.authService.continueAsGuest();
-  }
 }

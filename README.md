@@ -1,13 +1,13 @@
 # Bask Learning App
 
-Bask is an Angular MVP for learning Basque from scratch with a playful, Duolingo-inspired experience. This first version focuses on a clean foundation: a dashboard, a short demo lesson, and Firebase-ready service abstractions that still run locally without live credentials.
+Bask is an Angular MVP for learning Basque from scratch with a playful, Duolingo-inspired experience. This version focuses on a clean foundation: a dashboard, a short starter lesson, Firebase Authentication, and local progress scoped to each signed-in learner.
 
 ## Current MVP scope
 
 - Responsive home/dashboard screen introducing the product concept
 - Starter Basque lesson with demo flashcards and multiple-choice practice
-- Local learner session and progress persistence for safe offline/demo use
-- Firebase configuration placeholders for future authentication and progress sync
+- Firebase Authentication with email/password, Google, and Apple sign-in flows
+- Local learner progress persistence scoped to the authenticated Firebase user
 - Angular unit tests for the starter lesson flow and key services
 
 ## Prerequisites
@@ -43,7 +43,7 @@ npx ng generate component features/example
 
 ## Firebase setup
 
-This repository does **not** include real Firebase credentials.
+This repository expects a Firebase project configuration for the web app plus enabled Authentication providers.
 
 1. Create or open a Firebase project in the [Firebase console](https://console.firebase.google.com/).
 2. Add a Web app to the project.
@@ -64,7 +64,7 @@ export const environment = {
 };
 ```
 
-If those values stay empty, the app automatically remains in demo mode and still runs locally.
+Enable the Email/Password, Google, and Apple providers in Firebase Authentication before testing those sign-in flows.
 
 ## Project structure
 
@@ -91,13 +91,12 @@ npm test -- --watch=false
 
 The initial test coverage focuses on:
 
-- demo learner session creation
-- local learner progress recording
+- Firebase auth restoration and sign-in errors
+- local learner progress recording per authenticated learner
 - completion of the starter greetings lesson
 
 ## What is intentionally not included yet
 
-- production authentication flows
 - payments or subscriptions
 - analytics
 - a full Basque curriculum

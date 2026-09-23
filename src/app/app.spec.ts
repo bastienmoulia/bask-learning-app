@@ -1,12 +1,34 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
+import { vi } from 'vitest';
 import { AppComponent } from './app';
+import { AuthService } from './core/services/auth';
 
 describe('App', () => {
+  const signOut = vi.fn().mockResolvedValue(true);
+
   beforeEach(async () => {
+    signOut.mockReset().mockResolvedValue(true);
+
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        {
+          provide: AuthService,
+          useValue: {
+            isSignedIn: signal(true).asReadonly(),
+            isLoading: signal(false).asReadonly(),
+            learner: signal({
+              id: 'learner-123',
+              displayName: 'Learner',
+              email: 'learner@example.com',
+            }).asReadonly(),
+            signOut,
+          },
+        },
+      ],
     }).compileComponents();
   });
 
@@ -16,11 +38,21 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render the app navigation', async () => {
+  it('renders the authenticated navigation and supports sign-out', async () => {
+    const router = TestBed.inject(Router);
+    const navigateByUrlSpy = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
     const fixture = TestBed.createComponent(AppComponent);
-    await fixture.whenStable();
+    fixture.detectChanges();
+
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.brand strong')?.textContent).toContain('Bask');
     expect(compiled.textContent).toContain('First lesson');
+
+    const button = compiled.querySelector('.topbar__action') as HTMLButtonElement;
+    button.click();
+    await fixture.whenStable();
+
+    expect(signOut).toHaveBeenCalledTimes(1);
+    expect(navigateByUrlSpy).toHaveBeenCalledWith('/sign-in');
   });
 });

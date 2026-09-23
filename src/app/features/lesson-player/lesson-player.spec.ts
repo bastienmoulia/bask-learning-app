@@ -1,5 +1,7 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { AuthService } from '../../core/services/auth';
 import { LearnerProgressService } from '../../core/services/learner-progress';
 import { LessonPlayerComponent } from './lesson-player';
 
@@ -12,7 +14,19 @@ describe('LessonPlayerComponent', () => {
     localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [LessonPlayerComponent],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        {
+          provide: AuthService,
+          useValue: {
+            learner: signal({
+              id: 'learner-123',
+              displayName: 'Learner',
+              email: 'learner@example.com',
+            }).asReadonly(),
+          },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LessonPlayerComponent);

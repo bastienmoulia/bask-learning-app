@@ -1,0 +1,96 @@
+<section class="auth-shell">
+  <div class="auth-card">
+    <span class="auth-card__eyebrow">Firebase Authentication</span>
+    <h1>Sign in to keep your lessons tied to your account.</h1>
+    <p>
+      Use email and password, Google, or Apple to access your lessons on the web and in the iOS
+      app.
+    </p>
+
+    @if (isLoading()) {
+      <div class="auth-feedback auth-feedback--info" role="status">
+        Restoring your Firebase session…
+      </div>
+    } @else {
+      @if (feedback(); as feedbackMessage) {
+        <div
+          class="auth-feedback"
+          [class.auth-feedback--error]="feedbackMessage.kind === 'error'"
+          [class.auth-feedback--success]="feedbackMessage.kind === 'success'"
+          [class.auth-feedback--info]="feedbackMessage.kind === 'info'"
+          role="status"
+        >
+          {{ feedbackMessage.text }}
+        </div>
+      }
+
+      <label class="auth-field">
+        <span>Email</span>
+        <input
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+          autocomplete="email"
+          name="email"
+          type="email"
+        />
+      </label>
+
+      <label class="auth-field">
+        <span>Password</span>
+        <input
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+          autocomplete="current-password"
+          name="password"
+          type="password"
+        />
+      </label>
+
+      <div class="auth-actions">
+        <button
+          class="button button--primary"
+          type="button"
+          [disabled]="!isConfigured"
+          (click)="signInWithEmail()"
+        >
+          Sign in
+        </button>
+        <button
+          class="button button--secondary"
+          type="button"
+          [disabled]="!isConfigured"
+          (click)="registerWithEmail()"
+        >
+          Create account
+        </button>
+      </div>
+
+      <div class="auth-actions auth-actions--stacked">
+        <button
+          class="button button--secondary"
+          type="button"
+          [disabled]="!isConfigured"
+          (click)="signInWithGoogle()"
+        >
+          Continue with Google
+        </button>
+        <button
+          class="button button--secondary"
+          type="button"
+          [disabled]="!isConfigured"
+          (click)="signInWithApple()"
+        >
+          Continue with Apple
+        </button>
+        <button
+          class="button button--ghost"
+          type="button"
+          [disabled]="!isConfigured"
+          (click)="resetPassword()"
+        >
+          Forgot password?
+        </button>
+      </div>
+    }
+  </div>
+</section>
