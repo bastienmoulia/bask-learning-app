@@ -26,8 +26,10 @@ describe('firebase helpers', () => {
 
     expect(services.isConfigured).toBe(false);
     expect(services.app).toBeNull();
+    expect(services.appCheck).toBeNull();
     expect(services.auth).toBeNull();
     expect(services.firestore).toBeNull();
+    expect(services.appCheckEnabled).toBe(false);
   });
 
   it('initializes Firebase services when a complete config is provided', async () => {
@@ -47,6 +49,7 @@ describe('firebase helpers', () => {
     expect(services.app?.name).toBe(appName);
     expect(services.auth).not.toBeNull();
     expect(services.firestore).not.toBeNull();
+    expect(services.appCheckEnabled).toBe(false);
 
     await deleteApp(services.app!);
   });

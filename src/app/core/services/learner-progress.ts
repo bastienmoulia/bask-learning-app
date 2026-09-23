@@ -14,6 +14,7 @@ export interface ProgressSyncFeedback {
 
 export interface LessonCompletionSummary {
   lessonId: string;
+  lessonVersion: string;
   title: string;
   stepsCompleted: number;
   totalSteps: number;
@@ -86,6 +87,7 @@ export class LearnerProgressService {
   recordLessonCompletion(
     lessonId: string,
     title: string,
+    lessonVersion: string,
     totalSteps: number,
     correctAnswers: number,
   ) {
@@ -108,6 +110,7 @@ export class LearnerProgressService {
         ...currentProgress.lessonSummaries,
         [lessonId]: {
           lessonId,
+          lessonVersion,
           title,
           stepsCompleted: totalSteps,
           totalSteps,
@@ -194,7 +197,9 @@ export class LearnerProgressService {
     }
 
     try {
-      const snapshot = await getDoc(doc(this.firebase.firestore, learnerProgressCollection, learnerId));
+      const snapshot = await getDoc(
+        doc(this.firebase.firestore, learnerProgressCollection, learnerId),
+      );
 
       if (!snapshot.exists()) {
         return null;
@@ -244,7 +249,9 @@ export class LearnerProgressService {
   }
 
   private isLatestRestoreRequest(learnerId: string, restoreRequestId: number) {
-    return restoreRequestId === this.restoreRequestId && this.authService.learner()?.id === learnerId;
+    return (
+      restoreRequestId === this.restoreRequestId && this.authService.learner()?.id === learnerId
+    );
   }
 
   private setSyncError(message: string) {
@@ -333,7 +340,10 @@ function isLearnerDashboardProgress(data: unknown): data is LearnerDashboardProg
   );
 }
 
-function isLessonCompletionSummary(data: unknown, lessonId: string): data is LessonCompletionSummary {
+function isLessonCompletionSummary(
+  data: unknown,
+  lessonId: string,
+): data is LessonCompletionSummary {
   if (!data || typeof data !== 'object') {
     return false;
   }
@@ -342,6 +352,7 @@ function isLessonCompletionSummary(data: unknown, lessonId: string): data is Les
 
   return (
     summary.lessonId === lessonId &&
+    typeof summary.lessonVersion === 'string' &&
     typeof summary.title === 'string' &&
     Number.isFinite(summary.stepsCompleted) &&
     Number.isFinite(summary.totalSteps) &&
@@ -401,6 +412,7 @@ function mergeLessonSummary(
   return {
     lessonId,
     title: latestSummary.title,
+    lessonVersion: latestSummary.lessonVersion,
     stepsCompleted: Math.max(localSummary.stepsCompleted, remoteSummary.stepsCompleted),
     totalSteps: Math.max(localSummary.totalSteps, remoteSummary.totalSteps),
     bestScore: Math.max(localSummary.bestScore, remoteSummary.bestScore),

@@ -29,8 +29,10 @@ describe('HomeComponent', () => {
           provide: FIREBASE_SERVICES,
           useValue: {
             app: null,
+            appCheck: null,
             auth: null,
             firestore: null,
+            appCheckEnabled: false,
             isConfigured: false,
           },
         },

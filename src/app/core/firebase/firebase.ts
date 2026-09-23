@@ -1,5 +1,6 @@
 import { InjectionToken } from '@angular/core';
 import { FirebaseApp, FirebaseOptions, getApps, initializeApp } from 'firebase/app';
+import { AppCheck, initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { Auth, getAuth } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
 import { environment } from '../../../environments/environment';
@@ -15,8 +16,10 @@ const requiredFirebaseKeys: (keyof FirebaseOptions)[] = [
 
 export interface FirebaseServices {
   app: FirebaseApp | null;
+  appCheck: AppCheck | null;
   auth: Auth | null;
   firestore: Firestore | null;
+  appCheckEnabled: boolean;
   isConfigured: boolean;
 }
 
@@ -36,8 +39,10 @@ export function getFirebaseServices(
   if (!hasFirebaseConfig(config)) {
     return {
       app: null,
+      appCheck: null,
       auth: null,
       firestore: null,
+      appCheckEnabled: false,
       isConfigured: false,
     };
   }
@@ -47,10 +52,39 @@ export function getFirebaseServices(
     existingApp ??
     (appName === defaultFirebaseAppName ? initializeApp(config) : initializeApp(config, appName));
 
+  const appCheck = getAppCheck(app);
+
   return {
     app,
+    appCheck,
     auth: getAuth(app),
     firestore: getFirestore(app),
+    appCheckEnabled: appCheck !== null,
     isConfigured: true,
   };
+}
+
+function getAppCheck(app: FirebaseApp) {
+  const siteKey = environment.appCheck?.siteKey?.trim();
+
+  if (!siteKey || typeof window === 'undefined') {
+    return null;
+  }
+
+  const debugToken = environment.appCheck?.debugToken;
+
+  if (debugToken) {
+    (
+      window as Window & { FIREBASE_APPCHECK_DEBUG_TOKEN?: string | boolean }
+    ).FIREBASE_APPCHECK_DEBUG_TOKEN = debugToken;
+  }
+
+  try {
+    return initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(siteKey),
+      isTokenAutoRefreshEnabled: environment.appCheck?.isTokenAutoRefreshEnabled ?? true,
+    });
+  } catch {
+    return null;
+  }
 }

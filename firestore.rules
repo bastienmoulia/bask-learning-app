@@ -8,22 +8,38 @@ service cloud.firestore {
     //
     // This prototype security rules file assumes the following data structure:
     //
+    // Collection: publishedLessons
+    // Document ID: starter-basque-greetings
+    // Fields:
+    //   - id: string (required, immutable, must equal document ID)
+    //   - title: string (required, 3..120 chars)
+    //   - description: string (required, 10..280 chars)
+    //   - level: string (required, 2..40 chars)
+    //   - estimatedMinutes: number (required, 1..30)
+    //   - demoLabel: string (required, 3..160 chars)
+    //   - version: string (required, 1..40 chars)
+    //   - published: boolean (required, must be true for learner reads)
+    //   - publishedAt: ISO 8601 string (required)
+    //   - challenges: list (required, currently reviewed and published by a
+    //     privileged workflow outside client write access)
+    //
     // Collection: learnerProgress
     // Document ID: {userId} (must equal request.auth.uid)
     // Fields:
     //   - uid: string (required, immutable, must equal document ID)
     //   - updatedAt: ISO 8601 string (required)
     //   - streakDays: number (required, 0..3650)
-    //   - totalXp: number (required, 0 or 15 for the current single-lesson MVP)
-    //   - lessonsCompleted: number (required, 0 or 1 for the current single-lesson MVP)
+    //   - totalXp: number (required, 0 or 15 for the current published lesson)
+    //   - lessonsCompleted: number (required, 0 or 1 for the current published lesson)
     //   - currentPathLabel: string (required, 1..60 chars)
     //   - lessonSummaries: map (required, only starter-basque-greetings is allowed)
     //
     // Nested lessonSummaries.starter-basque-greetings fields:
     //   - lessonId: string (required, must equal starter-basque-greetings)
+    //   - lessonVersion: string (required, 1..40 chars)
     //   - title: string (required, 1..120 chars)
-    //   - stepsCompleted: number (required, 4 for the current MVP lesson)
-    //   - totalSteps: number (required, 4 for the current MVP lesson)
+    //   - stepsCompleted: number (required, 4 for the current published lesson)
+    //   - totalSteps: number (required, 4 for the current published lesson)
     //   - bestScore: number (required, 0..2)
     //   - lastPlayedAt: ISO 8601 string (required)
     //
@@ -78,6 +94,7 @@ service cloud.firestore {
       return summary is map &&
         summary.keys().hasAll([
           'lessonId',
+          'lessonVersion',
           'title',
           'stepsCompleted',
           'totalSteps',
@@ -86,6 +103,7 @@ service cloud.firestore {
         ]) &&
         summary.keys().hasOnly([
           'lessonId',
+          'lessonVersion',
           'title',
           'stepsCompleted',
           'totalSteps',
@@ -93,6 +111,9 @@ service cloud.firestore {
           'lastPlayedAt',
         ]) &&
         summary.lessonId == 'starter-basque-greetings' &&
+        summary.lessonVersion is string &&
+        summary.lessonVersion.size() >= 1 &&
+        summary.lessonVersion.size() <= 40 &&
         summary.title is string &&
         summary.title.size() >= 1 &&
         summary.title.size() <= 120 &&
@@ -169,6 +190,21 @@ service cloud.firestore {
         request.resource.data.currentPathLabel.size() <= 60 &&
         isValidLessonSummaries() &&
         isValidProgressCounts();
+    }
+
+    function isReadablePublishedStarterLesson(lessonId) {
+      return lessonId == 'starter-basque-greetings' &&
+        resource.data.id == lessonId &&
+        resource.data.published == true &&
+        resource.data.version is string &&
+        resource.data.version.size() >= 1 &&
+        resource.data.version.size() <= 40 &&
+        isValidIsoDateString(resource.data.publishedAt);
+    }
+
+    match /publishedLessons/{lessonId} {
+      allow read: if isAuthenticated() && isReadablePublishedStarterLesson(lessonId);
+      allow create, update, delete: if false;
     }
 
     match /learnerProgress/{userId} {
