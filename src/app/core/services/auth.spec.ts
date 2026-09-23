@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Auth } from 'firebase/auth';
+import { Firestore } from 'firebase/firestore';
 import { vi } from 'vitest';
 import { FIREBASE_SERVICES, type FirebaseServices } from '../firebase/firebase';
 import { AuthService } from './auth';
@@ -19,6 +20,7 @@ const firebaseAuthMocks = vi.hoisted(() => {
     signInWithPopup: vi.fn().mockResolvedValue(undefined),
     signInWithRedirect: vi.fn().mockResolvedValue(undefined),
     signOut: vi.fn().mockResolvedValue(undefined),
+    getAuth: vi.fn(() => ({} as Auth)),
     onAuthStateChanged: vi.fn(
       (
         _auth: Auth,
@@ -40,6 +42,32 @@ const firebaseAuthMocks = vi.hoisted(() => {
 
 vi.mock('firebase/auth', () => firebaseAuthMocks);
 
+const firebaseFirestoreMocks = vi.hoisted(() => {
+  let profileSnapshotCallback:
+    | ((snapshot: { exists: () => boolean; data: () => unknown }) => void)
+    | undefined;
+
+  return {
+    profileSnapshotCallback: () => profileSnapshotCallback,
+    doc: vi.fn((_firestore: Firestore, collectionPath: string, documentId: string) => ({
+      collectionPath,
+      documentId,
+    })),
+    getFirestore: vi.fn(() => ({}) as Firestore),
+    getDoc: vi.fn().mockResolvedValue({
+      exists: () => false,
+      data: () => undefined,
+    }),
+    setDoc: vi.fn().mockResolvedValue(undefined),
+    onSnapshot: vi.fn((_docRef, onNext: (snapshot: { exists: () => boolean; data: () => unknown }) => void) => {
+      profileSnapshotCallback = onNext;
+      return vi.fn();
+    }),
+  };
+});
+
+vi.mock('firebase/firestore', () => firebaseFirestoreMocks);
+
 interface MockUser {
   uid: string;
   displayName: string | null;
@@ -51,6 +79,7 @@ describe('AuthService', () => {
 
   function configureAuthService(options?: Partial<FirebaseServices>) {
     const mockAuth = {} as Auth;
+    const mockFirestore = {} as Firestore;
 
     TestBed.configureTestingModule({
       providers: [
@@ -60,7 +89,8 @@ describe('AuthService', () => {
             app: null,
             appCheck: null,
             auth: mockAuth,
-            firestore: null,
+            firestore: mockFirestore,
+            functions: null,
             appCheckEnabled: false,
             isConfigured: true,
             ...options,
@@ -83,6 +113,13 @@ describe('AuthService', () => {
     firebaseAuthMocks.signInWithRedirect.mockReset().mockResolvedValue(undefined);
     firebaseAuthMocks.signOut.mockReset().mockResolvedValue(undefined);
     firebaseAuthMocks.onAuthStateChanged.mockClear();
+    firebaseFirestoreMocks.doc.mockClear();
+    firebaseFirestoreMocks.getDoc.mockReset().mockResolvedValue({
+      exists: () => false,
+      data: () => undefined,
+    });
+    firebaseFirestoreMocks.setDoc.mockReset().mockResolvedValue(undefined);
+    firebaseFirestoreMocks.onSnapshot.mockClear();
   });
 
   it('restores the Firebase learner from auth state changes', async () => {
@@ -104,7 +141,38 @@ describe('AuthService', () => {
       id: 'learner-123',
       displayName: 'learner@example.com',
       email: 'learner@example.com',
+      role: 'learner',
     });
+  });
+
+  it('provisions a missing Firestore profile and reflects admin role changes', async () => {
+    configureAuthService();
+    await vi.waitFor(() => expect(firebaseAuthMocks.onAuthStateChanged).toHaveBeenCalledTimes(1));
+
+    firebaseAuthMocks.authStateChangedCallback()?.({
+      uid: 'admin-123',
+      displayName: 'Ane Admin',
+      email: 'ane@example.com',
+    });
+    await service.whenReady();
+
+    expect(firebaseFirestoreMocks.setDoc).toHaveBeenCalledTimes(1);
+    expect(service.learner()?.role).toBe('learner');
+
+    firebaseFirestoreMocks.profileSnapshotCallback()?.({
+      exists: () => true,
+      data: () => ({
+        uid: 'admin-123',
+        displayName: 'Ane Admin',
+        email: 'ane@example.com',
+        role: 'admin',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      }),
+    });
+
+    expect(service.learner()?.role).toBe('admin');
+    expect(service.isAdmin()).toBe(true);
   });
 
   it('shows a friendly sign-in error when a popup is cancelled', async () => {
@@ -148,6 +216,7 @@ describe('AuthService', () => {
   it('reports missing Firebase configuration without creating a local guest', async () => {
     configureAuthService({
       auth: null,
+      firestore: null,
       isConfigured: false,
     });
 

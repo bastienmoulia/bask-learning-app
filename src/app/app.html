@@ -16,6 +16,9 @@
         <a routerLink="/lesson/starter-basque-greetings" routerLinkActive="is-active">
           First lesson
         </a>
+        @if (isAdmin()) {
+          <a routerLink="/admin" routerLinkActive="is-active">Admin</a>
+        }
       } @else {
         <a
           routerLink="/sign-in"

@@ -3,6 +3,7 @@ import { FirebaseApp, FirebaseOptions, getApps, initializeApp } from 'firebase/a
 import { AppCheck, initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { Auth, getAuth } from 'firebase/auth';
 import { Firestore, getFirestore } from 'firebase/firestore';
+import { Functions, getFunctions } from 'firebase/functions';
 import { environment } from '../../../environments/environment';
 
 export const defaultFirebaseAppName = '[DEFAULT]';
@@ -19,6 +20,7 @@ export interface FirebaseServices {
   appCheck: AppCheck | null;
   auth: Auth | null;
   firestore: Firestore | null;
+  functions: Functions | null;
   appCheckEnabled: boolean;
   isConfigured: boolean;
 }
@@ -42,6 +44,7 @@ export function getFirebaseServices(
       appCheck: null,
       auth: null,
       firestore: null,
+      functions: null,
       appCheckEnabled: false,
       isConfigured: false,
     };
@@ -59,6 +62,7 @@ export function getFirebaseServices(
     appCheck,
     auth: getAuth(app),
     firestore: getFirestore(app),
+    functions: getFunctions(app),
     appCheckEnabled: appCheck !== null,
     isConfigured: true,
   };

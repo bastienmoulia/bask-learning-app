@@ -1,0 +1,49 @@
+<section>
+  <span>Administrator access</span>
+  <h1>Manage registered users</h1>
+  <p>
+    Promote trusted learners to administrators or revoke access. Role changes are applied through a
+    trusted backend operation.
+  </p>
+
+  @if (feedback(); as feedbackMessage) {
+    <p aria-live="polite">{{ feedbackMessage.text }}</p>
+  }
+
+  @if (isLoading()) {
+    <p>Loading registered users…</p>
+  } @else if (!users().length) {
+    <p>No registered users are available yet.</p>
+  } @else {
+    <ul>
+      @for (user of users(); track user.uid) {
+        <li>
+          <strong>{{ user.displayName }}</strong>
+          <div>{{ user.email ?? 'No email shared by this provider' }}</div>
+          <div>Role: {{ user.role }}</div>
+          <div>Updated: {{ user.updatedAt | date: 'medium' }}</div>
+
+          @if (isCurrentUser(user)) {
+            <p>Your own access is managed through the backend bootstrap flow.</p>
+          } @else if (user.role === 'learner') {
+            <button
+              type="button"
+              [disabled]="activeUserId() === user.uid"
+              (click)="promote(user)"
+            >
+              Grant admin access
+            </button>
+          } @else {
+            <button
+              type="button"
+              [disabled]="activeUserId() === user.uid"
+              (click)="revoke(user)"
+            >
+              Revoke admin access
+            </button>
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>

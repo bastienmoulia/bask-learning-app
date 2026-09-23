@@ -29,6 +29,7 @@ describe('firebase helpers', () => {
     expect(services.appCheck).toBeNull();
     expect(services.auth).toBeNull();
     expect(services.firestore).toBeNull();
+    expect(services.functions).toBeNull();
     expect(services.appCheckEnabled).toBe(false);
   });
 
@@ -49,6 +50,7 @@ describe('firebase helpers', () => {
     expect(services.app?.name).toBe(appName);
     expect(services.auth).not.toBeNull();
     expect(services.firestore).not.toBeNull();
+    expect(services.functions).not.toBeNull();
     expect(services.appCheckEnabled).toBe(false);
 
     await deleteApp(services.app!);

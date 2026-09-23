@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { UrlTree } from '@angular/router';
 import { vi } from 'vitest';
-import { authGuard } from './core/guards/auth.guard';
+import { adminGuard, authGuard } from './core/guards/auth.guard';
 import { AuthService } from './core/services/auth';
 
 describe('authGuard', () => {
@@ -47,5 +47,29 @@ describe('authGuard', () => {
     expect(router.serializeUrl(guardResult as UrlTree)).toBe(
       '/sign-in?returnUrl=%2Flesson%2Fstarter-basque-greetings',
     );
+  });
+
+  it('redirects non-admin learners away from the admin route', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        {
+          provide: AuthService,
+          useValue: {
+            whenReady: vi.fn().mockResolvedValue(undefined),
+            isSignedIn: vi.fn(() => true),
+            isAdmin: vi.fn(() => false),
+          },
+        },
+      ],
+    });
+
+    const router = TestBed.inject(Router);
+    const guardResult = await TestBed.runInInjectionContext(async () =>
+      adminGuard({} as never, { url: '/admin' } as never),
+    );
+
+    expect(guardResult).toBeInstanceOf(UrlTree);
+    expect(router.serializeUrl(guardResult as UrlTree)).toBe('/');
   });
 });
