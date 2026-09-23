@@ -1,18 +1,188 @@
-rules_version='2'
+rules_version='2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // This prototype security rules file assumes the following data structure:
+    //
+    // Collection: learnerProgress
+    // Document ID: {userId} (must equal request.auth.uid)
+    // Fields:
+    //   - uid: string (required, immutable, must equal document ID)
+    //   - updatedAt: ISO 8601 string (required)
+    //   - streakDays: number (required, 0..3650)
+    //   - totalXp: number (required, 0 or 15 for the current single-lesson MVP)
+    //   - lessonsCompleted: number (required, 0 or 1 for the current single-lesson MVP)
+    //   - currentPathLabel: string (required, 1..60 chars)
+    //   - lessonSummaries: map (required, only starter-basque-greetings is allowed)
+    //
+    // Nested lessonSummaries.starter-basque-greetings fields:
+    //   - lessonId: string (required, must equal starter-basque-greetings)
+    //   - title: string (required, 1..120 chars)
+    //   - stepsCompleted: number (required, 4 for the current MVP lesson)
+    //   - totalSteps: number (required, 4 for the current MVP lesson)
+    //   - bestScore: number (required, 0..2)
+    //   - lastPlayedAt: ISO 8601 string (required)
+    //
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+    function uidUnchanged(userId) {
+      return request.resource.data.uid is string &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.uid == userId;
+    }
+
+    function uidNotModified(userId) {
+      return request.resource.data.uid is string &&
+        request.resource.data.uid == resource.data.uid &&
+        request.resource.data.uid == request.auth.uid &&
+        resource.data.uid == userId;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidIsoDateString(value) {
+      return value is string &&
+        value.size() >= 20 &&
+        value.size() <= 40 &&
+        value.matches("^\\\\d{4}-\\\\d{2}-\\\\d{2}T\\\\d{2}:\\\\d{2}:\\\\d{2}.*Z$");
+    }
+
+    function hasStarterLesson() {
+      return 'starter-basque-greetings' in request.resource.data.lessonSummaries;
+    }
+
+    function isValidStarterLessonSummary(summary) {
+      return summary is map &&
+        summary.keys().hasAll([
+          'lessonId',
+          'title',
+          'stepsCompleted',
+          'totalSteps',
+          'bestScore',
+          'lastPlayedAt',
+        ]) &&
+        summary.keys().hasOnly([
+          'lessonId',
+          'title',
+          'stepsCompleted',
+          'totalSteps',
+          'bestScore',
+          'lastPlayedAt',
+        ]) &&
+        summary.lessonId == 'starter-basque-greetings' &&
+        summary.title is string &&
+        summary.title.size() >= 1 &&
+        summary.title.size() <= 120 &&
+        summary.stepsCompleted is number &&
+        summary.stepsCompleted == 4 &&
+        summary.totalSteps is number &&
+        summary.totalSteps == 4 &&
+        summary.bestScore is number &&
+        summary.bestScore >= 0 &&
+        summary.bestScore <= 2 &&
+        isValidIsoDateString(summary.lastPlayedAt);
+    }
+
+    function isValidLessonSummaries() {
+      return request.resource.data.lessonSummaries is map &&
+        request.resource.data.lessonSummaries.keys().hasOnly(['starter-basque-greetings']) &&
+        (
+          !hasStarterLesson() ||
+          isValidStarterLessonSummary(request.resource.data.lessonSummaries['starter-basque-greetings'])
+        );
+    }
+
+    function isValidProgressCounts() {
+      return (
+        hasStarterLesson() &&
+        request.resource.data.lessonsCompleted == 1 &&
+        request.resource.data.totalXp == 15
+      ) || (
+        !hasStarterLesson() &&
+        request.resource.data.lessonsCompleted == 0 &&
+        request.resource.data.totalXp == 0
+      );
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    function isValidLearnerProgress(userId) {
+      return hasRequiredFields([
+          'uid',
+          'updatedAt',
+          'streakDays',
+          'totalXp',
+          'lessonsCompleted',
+          'currentPathLabel',
+          'lessonSummaries',
+        ]) &&
+        hasOnlyAllowedFields([
+          'uid',
+          'updatedAt',
+          'streakDays',
+          'totalXp',
+          'lessonsCompleted',
+          'currentPathLabel',
+          'lessonSummaries',
+        ]) &&
+        uidUnchanged(userId) &&
+        isValidIsoDateString(request.resource.data.updatedAt) &&
+        request.resource.data.streakDays is number &&
+        request.resource.data.streakDays >= 0 &&
+        request.resource.data.streakDays <= 3650 &&
+        request.resource.data.lessonsCompleted is number &&
+        (
+          request.resource.data.lessonsCompleted == 0 ||
+          request.resource.data.lessonsCompleted == 1
+        ) &&
+        request.resource.data.totalXp is number &&
+        (
+          request.resource.data.totalXp == 0 ||
+          request.resource.data.totalXp == 15
+        ) &&
+        request.resource.data.currentPathLabel is string &&
+        request.resource.data.currentPathLabel.size() >= 1 &&
+        request.resource.data.currentPathLabel.size() <= 60 &&
+        isValidLessonSummaries() &&
+        isValidProgressCounts();
+    }
+
+    match /learnerProgress/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidLearnerProgress(userId);
+      allow update: if isOwner(userId) &&
+        isDocOwner() &&
+        uidNotModified(userId) &&
+        isValidLearnerProgress(userId);
+      allow delete: if isOwner(userId) && isDocOwner();
+    }
+
     match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2026, 10, 19);
+      allow read, write: if false;
     }
   }
 }

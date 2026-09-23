@@ -17,6 +17,7 @@ export class HomeComponent {
   private readonly learnerProgressService = inject(LearnerProgressService);
 
   protected readonly progress = this.learnerProgressService.progress;
+  protected readonly syncFeedback = this.learnerProgressService.syncFeedback;
   protected readonly learner = this.authService.learner;
   protected readonly completionRate = this.learnerProgressService.completionRate;
   protected readonly starterLesson = starterLesson;

@@ -100,6 +100,10 @@
       <h2>Oso ondo! Great start.</h2>
       <p>{{ summaryMessage() }}</p>
 
+      @if (syncFeedback(); as syncFeedback) {
+        <p aria-live="polite">{{ syncFeedback.text }}</p>
+      }
+
       <dl class="summary-grid">
         <div>
           <dt>Steps completed</dt>
