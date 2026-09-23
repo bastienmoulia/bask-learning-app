@@ -95,6 +95,24 @@ The initial test coverage focuses on:
 - local learner progress recording per authenticated learner
 - completion of the starter greetings lesson
 
+## iOS TestFlight deployment
+
+The manually triggered [TestFlight workflow](.github/workflows/ios-testflight.yml) builds the Angular app, syncs Capacitor, signs an iOS archive, and uploads its IPA to App Store Connect. It requires an Apple Developer Program membership and an App Store Connect app registered with bundle ID `bastienmoulia.bask.learning.app` under the same team. Configure the following in GitHub repository **Settings > Secrets and variables > Actions**:
+
+| Type | Name | Value |
+| --- | --- | --- |
+| Variable | `APPLE_TEAM_ID` | Apple Developer team ID |
+| Secret | `IOS_DISTRIBUTION_CERTIFICATE` | Base64-encoded Apple Distribution `.p12` certificate **with its private key** |
+| Secret | `IOS_CERTIFICATE_PASSWORD` | Password used when exporting the `.p12` |
+| Secret | `IOS_PROVISIONING_PROFILE` | Base64-encoded App Store Connect distribution `.mobileprovision` profile for that bundle ID and certificate |
+| Secret | `APP_STORE_CONNECT_API_KEY` | Full contents of an App Store Connect API `.p8` private key |
+| Secret | `APP_STORE_CONNECT_KEY_ID` | Key ID for that API key |
+| Secret | `APP_STORE_CONNECT_ISSUER_ID` | Issuer ID for that API key |
+
+Create the distribution certificate and App Store Connect provisioning profile in the Apple Developer portal, and an API key with app-upload permissions in App Store Connect. For the binary secrets, run `base64 < distribution.p12 | tr -d '\n'` and `base64 < distribution.mobileprovision | tr -d '\n'` locally and put the results in GitHub; never commit these files or keys. Keep the `.p8` key as plain multiline text in its secret. On macOS, create the `.p12` by exporting the certificate **and private key** from Keychain Access.
+
+Run **Deploy iOS to TestFlight** from the repository Actions tab. Each run sets a distinct iOS build number; maintain the marketing version in Xcode as needed. After upload, allow App Store Connect time to process the build and configure TestFlight testers and export compliance there. The upload is not an App Store release. The workflow requires a macOS runner with Xcode and cannot be fully tested on a machine with only Xcode Command Line Tools.
+
 ## What is intentionally not included yet
 
 - payments or subscriptions
