@@ -55,9 +55,16 @@
   <article>
     <span>📈 Demo progress</span>
     <strong>{{ completionRate() }}%</strong>
-    <p>Local progress stays separated by Firebase account on this device.</p>
+    <p>Progress syncs to your Firebase account, with local device fallback if sync is unavailable.</p>
   </article>
 </section>
+
+@if (syncFeedback(); as syncFeedback) {
+  <section class="card" aria-live="polite">
+    <strong>Progress sync needs attention</strong>
+    <p>{{ syncFeedback.text }}</p>
+  </section>
+}
 
 <section class="dashboard-grid" id="mvp-overview">
   <article class="card">
@@ -66,7 +73,7 @@
     <ul>
       <li>Flashcards for “Kaixo” and “Agur”</li>
       <li>Two quick multiple-choice checks</li>
-      <li>Completion summary stored locally per authenticated learner</li>
+      <li>Completion summary saved to your learner account with local fallback</li>
     </ul>
     <p class="demo-note">{{ starterLesson.demoLabel }}</p>
   </article>
@@ -97,12 +104,12 @@
     <h2>Authenticated learning foundation</h2>
     <p>
       Firebase Authentication gates the lesson flow, restores sessions after restart, and keeps
-      local progress isolated between accounts on the same device.
+      learner progress scoped to the signed-in account.
     </p>
     <ul>
       <li>Email/password, Google, and Apple sign-in options</li>
       <li>Protected lesson access while auth state restores</li>
-      <li>Progress persistence abstraction ready for future backend sync</li>
+      <li>Firestore-backed progress with clear local fallback if syncing fails</li>
     </ul>
   </article>
 </section>

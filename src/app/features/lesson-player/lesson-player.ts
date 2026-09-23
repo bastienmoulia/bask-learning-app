@@ -15,6 +15,7 @@ export class LessonPlayerComponent {
   private lessonCompletionRecorded = false;
 
   readonly lesson = starterLesson;
+  readonly syncFeedback = this.learnerProgressService.syncFeedback;
   readonly currentIndex = signal(0);
   readonly selectedOption = signal<string | null>(null);
   readonly revealAnswer = signal(false);

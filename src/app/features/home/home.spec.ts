@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { FIREBASE_SERVICES } from '../../core/firebase/firebase';
 import { AuthService } from '../../core/services/auth';
 import { HomeComponent } from './home';
 
@@ -22,6 +23,15 @@ describe('HomeComponent', () => {
               displayName: 'Ane learner',
               email: 'ane@example.com',
             }).asReadonly(),
+          },
+        },
+        {
+          provide: FIREBASE_SERVICES,
+          useValue: {
+            app: null,
+            auth: null,
+            firestore: null,
+            isConfigured: false,
           },
         },
       ],
