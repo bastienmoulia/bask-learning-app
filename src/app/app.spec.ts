@@ -19,11 +19,13 @@ describe('App', () => {
           provide: AuthService,
           useValue: {
             isSignedIn: signal(true).asReadonly(),
+            isAdmin: signal(true).asReadonly(),
             isLoading: signal(false).asReadonly(),
             learner: signal({
               id: 'learner-123',
               displayName: 'Learner',
               email: 'learner@example.com',
+              role: 'admin',
             }).asReadonly(),
             signOut,
           },
@@ -47,6 +49,7 @@ describe('App', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.brand strong')?.textContent).toContain('Bask');
     expect(compiled.textContent).toContain('First lesson');
+    expect(compiled.textContent).toContain('Admin');
 
     const button = compiled.querySelector('.topbar__action') as HTMLButtonElement;
     button.click();

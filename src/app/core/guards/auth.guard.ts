@@ -27,3 +27,20 @@ export const signedOutGuard: CanActivateFn = async () => {
 
   return authService.isSignedIn() ? router.createUrlTree(['/']) : true;
 };
+
+export const adminGuard: CanActivateFn = async () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  await authService.whenReady();
+
+  if (!authService.isSignedIn()) {
+    return router.createUrlTree(['/sign-in'], {
+      queryParams: {
+        returnUrl: '/admin',
+      },
+    });
+  }
+
+  return authService.isAdmin() ? true : router.createUrlTree(['/']);
+};

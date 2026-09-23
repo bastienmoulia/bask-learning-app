@@ -17,12 +17,21 @@ import {
   signOut as firebaseSignOut,
   User,
 } from 'firebase/auth';
+import { doc, getDoc, onSnapshot, setDoc, Unsubscribe } from 'firebase/firestore';
 import { FIREBASE_SERVICES } from '../firebase/firebase';
+import {
+  createDefaultUserProfile,
+  parseUserProfileDocument,
+  syncUserProfileIdentity,
+  usersCollection,
+  UserRole,
+} from './user-profiles';
 
 export interface LearnerSession {
   id: string;
   displayName: string;
   email: string | null;
+  role: UserRole;
 }
 
 export interface AuthFeedback {
@@ -33,11 +42,12 @@ export interface AuthFeedback {
 const missingFirebaseConfigMessage =
   'Firebase Authentication is not configured for this app yet. Add a valid Firebase web configuration before signing in.';
 
-function createLearnerSession(user: User): LearnerSession {
+function createLearnerSession(user: User, role: UserRole): LearnerSession {
   return {
     id: user.uid,
-    displayName: user.displayName?.trim() || user.email?.trim() || 'Bask learner',
+    displayName: createDefaultUserProfile(user).displayName,
     email: user.email,
+    role,
   };
 }
 
@@ -87,11 +97,13 @@ export class AuthService {
   private readonly feedbackSignal = signal<AuthFeedback | null>(null);
   private readonly authReadyPromise: Promise<void>;
   private resolveAuthReady?: () => void;
+  private userProfileUnsubscribe?: Unsubscribe;
 
   readonly learner = this.learnerSignal.asReadonly();
   readonly isLoading = this.loadingSignal.asReadonly();
   readonly feedback = this.feedbackSignal.asReadonly();
   readonly isSignedIn = computed(() => this.learner() !== null);
+  readonly isAdmin = computed(() => this.learner()?.role === 'admin');
   readonly isConfigured = this.firebase.isConfigured;
 
   constructor() {
@@ -217,9 +229,7 @@ export class AuthService {
     onAuthStateChanged(
       auth,
       (user) => {
-        this.learnerSignal.set(user ? createLearnerSession(user) : null);
-        this.loadingSignal.set(false);
-        this.finishAuthLoading();
+        void this.handleAuthStateChange(user);
       },
       (error) => {
         this.learnerSignal.set(null);
@@ -228,6 +238,77 @@ export class AuthService {
         this.finishAuthLoading();
       },
     );
+  }
+
+  private async handleAuthStateChange(user: User | null) {
+    this.userProfileUnsubscribe?.();
+    this.userProfileUnsubscribe = undefined;
+
+    if (!user) {
+      this.learnerSignal.set(null);
+      this.loadingSignal.set(false);
+      this.finishAuthLoading();
+      return;
+    }
+
+    if (!this.firebase.firestore) {
+      this.learnerSignal.set(createLearnerSession(user, 'learner'));
+      this.loadingSignal.set(false);
+      this.finishAuthLoading();
+      return;
+    }
+
+    this.loadingSignal.set(true);
+
+    try {
+      const userDocRef = doc(this.firebase.firestore, usersCollection, user.uid);
+      const userDoc = await getDoc(userDocRef);
+      let profile = userDoc.exists() ? parseUserProfileDocument(userDoc.data(), user.uid) : null;
+
+      if (!profile) {
+        profile = createDefaultUserProfile(user);
+        await setDoc(userDocRef, profile);
+      } else {
+        const syncedProfile = syncUserProfileIdentity(profile, user);
+
+        if (syncedProfile.updatedAt !== profile.updatedAt) {
+          profile = syncedProfile;
+          await setDoc(userDocRef, profile);
+        }
+      }
+
+      this.learnerSignal.set(createLearnerSession(user, profile.role));
+      this.loadingSignal.set(false);
+      this.finishAuthLoading();
+
+      this.userProfileUnsubscribe = onSnapshot(
+        userDocRef,
+        (snapshot) => {
+          const nextProfile = snapshot.exists()
+            ? parseUserProfileDocument(snapshot.data(), user.uid)
+            : null;
+
+          if (!nextProfile) {
+            this.learnerSignal.set(createLearnerSession(user, 'learner'));
+            return;
+          }
+
+          this.learnerSignal.set(createLearnerSession(user, nextProfile.role));
+        },
+        () => {
+          this.setError(
+            'We could not refresh your account role right now. Some protected features may stay unavailable until the next successful sync.',
+          );
+        },
+      );
+    } catch {
+      this.learnerSignal.set(createLearnerSession(user, 'learner'));
+      this.loadingSignal.set(false);
+      this.setError(
+        'We could not prepare your learner profile in Firestore right now. Signed-in learning features may be limited until it succeeds.',
+      );
+      this.finishAuthLoading();
+    }
   }
 
   private async signInWithProvider(provider: AuthProvider, providerLabel: string) {

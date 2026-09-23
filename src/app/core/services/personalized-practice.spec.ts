@@ -33,6 +33,7 @@ describe('PersonalizedPracticeService', () => {
     id: 'learner-a',
     displayName: 'Learner A',
     email: 'learner-a@example.com',
+    role: 'learner',
   });
 
   function createService(options?: Partial<FirebaseServices>) {
@@ -46,6 +47,7 @@ describe('PersonalizedPracticeService', () => {
       id: 'learner-a',
       displayName: 'Learner A',
       email: 'learner-a@example.com',
+      role: 'learner',
     });
     aiMocks.getAI.mockClear();
     aiMocks.getGenerativeModel.mockClear();
@@ -80,6 +82,7 @@ describe('PersonalizedPracticeService', () => {
             appCheck: null,
             auth: null,
             firestore: null,
+            functions: null,
             appCheckEnabled: true,
             isConfigured: true,
             ...options,

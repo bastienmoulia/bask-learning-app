@@ -15,6 +15,7 @@ export class AppComponent {
 
   protected readonly year = new Date().getFullYear();
   protected readonly isSignedIn = this.authService.isSignedIn;
+  protected readonly isAdmin = this.authService.isAdmin;
   protected readonly isLoading = this.authService.isLoading;
   protected readonly learner = this.authService.learner;
 

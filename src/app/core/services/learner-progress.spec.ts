@@ -39,6 +39,7 @@ describe('LearnerProgressService', () => {
             appCheck: null,
             auth: null,
             firestore: mockFirestore,
+            functions: null,
             appCheckEnabled: false,
             isConfigured: true,
             ...options,
@@ -57,6 +58,7 @@ describe('LearnerProgressService', () => {
       id: 'learner-a',
       displayName: 'Learner A',
       email: 'learner-a@example.com',
+      role: 'learner',
     });
     firestoreMocks.doc.mockClear();
     firestoreMocks.getDoc.mockReset().mockResolvedValue({
@@ -145,6 +147,7 @@ describe('LearnerProgressService', () => {
       id: 'learner-a',
       displayName: 'Learner A',
       email: 'learner-a@example.com',
+      role: 'learner',
     });
     TestBed.flushEffects();
 
@@ -193,6 +196,7 @@ describe('LearnerProgressService', () => {
       id: 'learner-b',
       displayName: 'Learner B',
       email: 'learner-b@example.com',
+      role: 'learner',
     });
     TestBed.flushEffects();
 
@@ -203,6 +207,7 @@ describe('LearnerProgressService', () => {
       id: 'learner-a',
       displayName: 'Learner A',
       email: 'learner-a@example.com',
+      role: 'learner',
     });
     TestBed.flushEffects();
 

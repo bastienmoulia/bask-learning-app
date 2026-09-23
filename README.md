@@ -8,6 +8,7 @@ Bask is an Angular MVP for learning Basque from scratch with a playful, Duolingo
 - Published starter Basque lesson loaded from Firestore with a reviewed local fallback
 - Firebase Authentication with email/password, Google, and Apple sign-in flows
 - Firestore-backed learner progress persistence scoped to the authenticated Firebase user
+- Firestore-backed user profiles with learner/admin roles and an admin management screen
 - Optional AI-assisted extra practice with App Check protection and client-side rate limiting
 - Angular unit tests for the starter lesson flow and key services
 
@@ -66,6 +67,24 @@ export const environment = {
 ```
 
 Enable the Email/Password, Google, and Apple providers in Firebase Authentication before testing those sign-in flows.
+
+### User profiles and administrator access
+
+When a learner signs in for the first time, the app provisions a Firestore document at
+`users/{uid}` with a default `learner` role. The `/admin` page is only available to signed-in
+administrators and lets them promote learners to admins or revoke admin access through a callable
+Cloud Function.
+
+Provision the first admin outside the client with the bootstrap script in `functions/`:
+
+```bash
+cd functions
+npm install
+npm run bootstrap:initial-admin -- <firebase-auth-uid>
+```
+
+The bootstrap script refuses to replace an existing admin, so it can be used as a trusted one-time
+setup step after the first account has been created in Firebase Authentication.
 
 ### Published lesson content
 
@@ -138,6 +157,6 @@ Run **Deploy iOS to TestFlight** from the repository Actions tab. Each run sets 
 - payments or subscriptions
 - analytics
 - a full Basque curriculum
-- an admin publishing workflow for lesson content
+- an admin publishing workflow for lesson content beyond role management
 
 Those areas can be added later on top of the current Angular structure and Firebase-ready abstractions.

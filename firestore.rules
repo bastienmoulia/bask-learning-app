@@ -43,6 +43,16 @@ service cloud.firestore {
     //   - bestScore: number (required, 0..2)
     //   - lastPlayedAt: ISO 8601 string (required)
     //
+    // Collection: users
+    // Document ID: {userId} (must equal Firebase Auth UID)
+    // Fields:
+    //   - uid: string (required, immutable, must equal document ID and request.auth.uid)
+    //   - displayName: string (required, 1..80 chars)
+    //   - email: string|null (required, null or a valid email up to 320 chars)
+    //   - role: string (required, immutable for client writes, one of learner/admin)
+    //   - createdAt: ISO 8601 string (required, immutable)
+    //   - updatedAt: ISO 8601 string (required)
+    //
     // ===============================================================
     // Helper Functions
     // ===============================================================
@@ -52,6 +62,12 @@ service cloud.firestore {
 
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     function isDocOwner() {
@@ -77,6 +93,21 @@ service cloud.firestore {
 
     function hasOnlyAllowedFields(fields) {
       return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(value) {
+      return value is string &&
+        value.size() >= 3 &&
+        value.size() <= 320 &&
+        value.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+    }
+
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    function roleUnchanged() {
+      return request.resource.data.role == resource.data.role;
     }
 
     function isValidIsoDateString(value) {
@@ -148,6 +179,38 @@ service cloud.firestore {
       );
     }
 
+    function isValidUserProfile(userId) {
+      return hasRequiredFields([
+          'uid',
+          'displayName',
+          'email',
+          'role',
+          'createdAt',
+          'updatedAt',
+        ]) &&
+        hasOnlyAllowedFields([
+          'uid',
+          'displayName',
+          'email',
+          'role',
+          'createdAt',
+          'updatedAt',
+        ]) &&
+        request.resource.data.uid is string &&
+        request.resource.data.uid == userId &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.displayName is string &&
+        request.resource.data.displayName.size() >= 1 &&
+        request.resource.data.displayName.size() <= 80 &&
+        (
+          request.resource.data.email == null ||
+          isValidEmail(request.resource.data.email)
+        ) &&
+        request.resource.data.role in ['learner', 'admin'] &&
+        isValidIsoDateString(request.resource.data.createdAt) &&
+        isValidIsoDateString(request.resource.data.updatedAt);
+    }
+
     // ===============================================================
     // Domain Validators
     // ===============================================================
@@ -215,6 +278,21 @@ service cloud.firestore {
         uidNotModified(userId) &&
         isValidLearnerProgress(userId);
       allow delete: if isOwner(userId) && isDocOwner();
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) &&
+        isValidUserProfile(userId) &&
+        request.resource.data.role == 'learner' &&
+        request.resource.data.createdAt == request.resource.data.updatedAt;
+      allow update: if isOwner(userId) &&
+        isDocOwner() &&
+        uidNotModified(userId) &&
+        isValidUserProfile(userId) &&
+        roleUnchanged() &&
+        areImmutableFieldsUnchanged(['uid', 'role', 'createdAt']);
+      allow delete: if false;
     }
 
     match /{document=**} {

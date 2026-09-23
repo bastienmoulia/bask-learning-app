@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, signedOutGuard } from './core/guards/auth.guard';
+import { adminGuard, authGuard, signedOutGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -20,6 +20,11 @@ export const routes: Routes = [
       import('./features/lesson-player/lesson-player').then(
         (module) => module.LessonPlayerComponent,
       ),
+  },
+  {
+    path: 'admin',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./features/admin/admin').then((module) => module.AdminComponent),
   },
   {
     path: '**',
