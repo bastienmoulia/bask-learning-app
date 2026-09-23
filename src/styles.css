@@ -1,0 +1,96 @@
+:root {
+  --font-sans:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  --font-size-eyebrow: 0.85rem;
+  --letter-spacing-eyebrow: 0.06em;
+
+  --color-text: #16324f;
+  --color-text-secondary: #23415e;
+  --color-text-tertiary: #31506d;
+  --color-text-muted: #597089;
+  --color-on-primary: white;
+
+  --color-primary: #0f8a47;
+  --color-primary-mid: #0faa58;
+  --color-primary-light: #1cd86f;
+  --color-error: #ab3b18;
+
+  --color-bg-start: #f5fbff;
+  --color-bg-end: #eef7ff;
+  --color-bg-glow: rgb(44 201 116 / 12%);
+  --color-surface: white;
+  --color-surface-glass: rgb(255 255 255 / 88%);
+  --color-surface-soft: #eef6ff;
+  --color-surface-subtle: #f7fbff;
+  --color-surface-mint: #f1fff6;
+  --color-surface-cream: #fef7dd;
+  --color-surface-note: #fff6da;
+  --color-surface-selected: #ffeeba;
+  --color-surface-correct: #dff8e8;
+  --color-surface-success: #e9fff1;
+  --color-surface-success-muted: #effcf3;
+  --color-surface-error: #fff0ec;
+  --color-track: #dce8f5;
+
+  --color-border: rgb(22 50 79 / 8%);
+  --color-border-strong: rgb(22 50 79 / 14%);
+
+  --gradient-primary: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+  --gradient-badge: linear-gradient(135deg, var(--color-primary-light), var(--color-primary-mid));
+  --gradient-accent: linear-gradient(160deg, var(--color-surface-mint), var(--color-surface-cream));
+  --gradient-flashcard: linear-gradient(160deg, var(--color-surface-mint), var(--color-surface-soft));
+
+  --shadow-card: 0 18px 36px rgb(22 50 79 / 8%);
+  --shadow-primary: 0 12px 20px rgb(15 138 71 / 26%);
+  --shadow-primary-soft: 0 12px 20px rgb(15 138 71 / 22%);
+  --shadow-badge: 0 10px 24px rgb(28 216 111 / 24%);
+
+  --radius-sm: 1rem;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
+  --space-page: clamp(1rem, 3vw, 2rem);
+  --transition-fast: 0.18s ease;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(circle at top, var(--color-bg-glow), transparent 30%),
+    linear-gradient(180deg, var(--color-bg-start) 0%, var(--color-bg-end) 100%);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  margin: 0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+a {
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-fast);
+}
+
+button:hover,
+button:focus-visible,
+a:hover,
+a:focus-visible {
+  transform: translateY(-1px);
+}

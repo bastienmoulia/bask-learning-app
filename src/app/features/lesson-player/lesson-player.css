@@ -1,6 +1,6 @@
 :host {
   display: block;
-  padding: clamp(1rem, 3vw, 2rem);
+  padding: var(--space-page);
 }
 
 .lesson-shell {
@@ -10,10 +10,10 @@
 
 .lesson-header,
 .challenge-card {
-  background: white;
-  border: 1px solid rgb(22 50 79 / 8%);
-  border-radius: 28px;
-  box-shadow: 0 18px 36px rgb(22 50 79 / 8%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
   margin-bottom: 1rem;
   padding: clamp(1.25rem, 4vw, 2rem);
 }
@@ -21,17 +21,17 @@
 .back-link,
 .primary-link,
 .secondary-action {
-  color: #23415e;
+  color: var(--color-text-secondary);
   font-weight: 700;
   text-decoration: none;
 }
 
 .lesson-badge,
 .challenge-card__eyebrow {
-  color: #0f8a47;
-  font-size: 0.85rem;
+  color: var(--color-primary);
+  font-size: var(--font-size-eyebrow);
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--letter-spacing-eyebrow);
   text-transform: uppercase;
 }
 
@@ -47,26 +47,26 @@
 .flashcard__translation,
 .completion-actions,
 dd {
-  color: #597089;
+  color: var(--color-text-muted);
 }
 
 .demo-note {
-  background: #fff6da;
-  border-radius: 18px;
+  background: var(--color-surface-note);
+  border-radius: var(--radius-md);
   margin-bottom: 0;
   padding: 0.85rem 1rem;
 }
 
 .progress-bar {
-  background: #dce8f5;
-  border-radius: 999px;
+  background: var(--color-track);
+  border-radius: var(--radius-pill);
   height: 0.9rem;
   margin: 1.25rem 0;
   overflow: hidden;
 }
 
 .progress-bar span {
-  background: linear-gradient(135deg, #1cd86f, #0f8a47);
+  background: var(--gradient-primary);
   display: block;
   height: 100%;
 }
@@ -84,8 +84,8 @@ dd {
 }
 
 .flashcard {
-  background: linear-gradient(160deg, #f1fff6, #eef6ff);
-  border-radius: 24px;
+  background: var(--gradient-flashcard);
+  border-radius: var(--radius-lg);
   cursor: pointer;
   display: grid;
   gap: 0.8rem;
@@ -100,7 +100,7 @@ dd {
 }
 
 .flashcard__label {
-  color: #0f8a47;
+  color: var(--color-primary);
   font-weight: 700;
 }
 
@@ -129,19 +129,19 @@ dd {
 }
 
 .answer {
-  background: #f7fbff;
-  border-radius: 18px;
+  background: var(--color-surface-subtle);
+  border-radius: var(--radius-md);
   cursor: pointer;
   padding: 1rem;
   text-align: left;
 }
 
 .answer--selected {
-  background: #ffeeba;
+  background: var(--color-surface-selected);
 }
 
 .answer--correct {
-  background: #dff8e8;
+  background: var(--color-surface-correct);
 }
 
 .answer--muted {
@@ -149,21 +149,21 @@ dd {
 }
 
 .feedback {
-  background: #eef6ff;
-  border-radius: 18px;
+  background: var(--color-surface-soft);
+  border-radius: var(--radius-md);
   margin-bottom: 1rem;
   padding: 1rem;
 }
 
 .feedback--success {
-  background: #e9fff1;
+  background: var(--color-surface-success);
 }
 
 .primary-action,
 .secondary-action,
 .primary-link {
   align-items: center;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   display: inline-flex;
   justify-content: center;
   min-height: 3rem;
@@ -172,9 +172,9 @@ dd {
 
 .primary-action,
 .primary-link {
-  background: linear-gradient(135deg, #1cd86f, #0f8a47);
-  box-shadow: 0 12px 20px rgb(15 138 71 / 22%);
-  color: white;
+  background: var(--gradient-primary);
+  box-shadow: var(--shadow-primary-soft);
+  color: var(--color-on-primary);
 }
 
 .primary-action:disabled {
@@ -184,7 +184,7 @@ dd {
 }
 
 .secondary-action {
-  background: #eef6ff;
+  background: var(--color-surface-soft);
 }
 
 .challenge-card--complete {

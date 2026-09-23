@@ -1,5 +1,5 @@
 :host {
-  color: #16324f;
+  color: var(--color-text);
   display: block;
   min-height: 100dvh;
 }
@@ -13,12 +13,12 @@
 .topbar {
   align-items: center;
   backdrop-filter: blur(16px);
-  background: rgb(255 255 255 / 88%);
-  border-bottom: 1px solid rgb(22 50 79 / 8%);
+  background: var(--color-surface-glass);
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   gap: 1rem;
   justify-content: space-between;
-  padding: 1rem clamp(1rem, 3vw, 2rem);
+  padding: 1rem var(--space-page);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -39,10 +39,10 @@
 
 .brand__badge {
   align-items: center;
-  background: linear-gradient(135deg, #1cd86f, #0faa58);
-  border-radius: 1rem;
-  box-shadow: 0 10px 24px rgb(28 216 111 / 24%);
-  color: white;
+  background: var(--gradient-badge);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-badge);
+  color: var(--color-on-primary);
   display: inline-flex;
   font-size: 1.1rem;
   height: 2.75rem;
@@ -51,7 +51,7 @@
 }
 
 .brand__tag {
-  color: #597089;
+  color: var(--color-text-muted);
   display: block;
   font-size: 0.85rem;
 }
@@ -63,8 +63,8 @@ nav {
 }
 
 nav a {
-  border-radius: 999px;
-  color: #31506d;
+  border-radius: var(--radius-pill);
+  color: var(--color-text-tertiary);
   font-weight: 600;
   padding: 0.7rem 1rem;
   text-decoration: none;
@@ -73,16 +73,16 @@ nav a {
 nav a:hover,
 nav a:focus-visible,
 nav a.is-active {
-  background: #e9fff1;
-  color: #0f8a47;
+  background: var(--color-surface-success);
+  color: var(--color-primary);
   outline: none;
 }
 
 .topbar__action {
-  background: #eef6ff;
+  background: var(--color-surface-soft);
   border: 0;
-  border-radius: 999px;
-  color: #23415e;
+  border-radius: var(--radius-pill);
+  color: var(--color-text-secondary);
   cursor: pointer;
   font: inherit;
   font-weight: 700;
@@ -94,9 +94,9 @@ main {
 }
 
 .footer {
-  color: #597089;
+  color: var(--color-text-muted);
   font-size: 0.95rem;
-  padding: 1rem clamp(1rem, 3vw, 2rem) 2rem;
+  padding: 1rem var(--space-page) 2rem;
   text-align: center;
 }
 

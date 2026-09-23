@@ -10,7 +10,7 @@ import { starterLesson } from '../lesson-player/starter-lesson';
   imports: [RouterLink, DatePipe],
   standalone: true,
   templateUrl: './home.html',
-  styleUrl: './home.scss',
+  styleUrl: './home.css',
 })
 export class HomeComponent {
   private readonly authService = inject(AuthService);

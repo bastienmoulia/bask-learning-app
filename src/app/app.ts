@@ -6,7 +6,7 @@ import { AuthService } from './core/services/auth';
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   selector: 'app-root',
   standalone: true,
-  styleUrl: './app.scss',
+  styleUrl: './app.css',
   templateUrl: './app.html',
 })
 export class AppComponent {
