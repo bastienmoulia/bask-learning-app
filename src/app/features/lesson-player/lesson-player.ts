@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { LearnerProgressService } from '../../core/services/learner-progress';
 import { LessonsService } from '../../core/services/lessons';
 import {
@@ -16,6 +16,7 @@ import { PlayableLesson, starterLesson } from './starter-lesson';
   styleUrl: './lesson-player.css',
 })
 export class LessonPlayerComponent {
+  private readonly route = inject(ActivatedRoute);
   private readonly learnerProgressService = inject(LearnerProgressService);
   private readonly lessonsService = inject(LessonsService);
   private readonly personalizedPracticeService = inject(PersonalizedPracticeService);
@@ -72,7 +73,7 @@ export class LessonPlayerComponent {
   });
 
   constructor() {
-    void this.loadPublishedLesson();
+    void this.loadPublishedLesson(this.route.snapshot.paramMap.get('lessonId') ?? starterLesson.id);
   }
 
   advanceFlashcard() {
@@ -160,9 +161,9 @@ export class LessonPlayerComponent {
     this.practiceFeedback.set(null);
   }
 
-  private async loadPublishedLesson() {
+  private async loadPublishedLesson(lessonId: string) {
     this.isLoadingLesson.set(true);
-    const publishedLessonResult = await this.lessonsService.getPublishedLesson(starterLesson.id);
+    const publishedLessonResult = await this.lessonsService.getPublishedLesson(lessonId);
 
     if (!publishedLessonResult.lesson) {
       this.lesson.set(null);

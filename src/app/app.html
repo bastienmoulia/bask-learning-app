@@ -13,7 +13,7 @@
         <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
           Dashboard
         </a>
-        <a routerLink="/lesson/starter-basque-greetings" routerLinkActive="is-active">
+        <a [routerLink]="['/lesson', 'starter-basque-greetings']" routerLinkActive="is-active">
           First lesson
         </a>
         @if (isAdmin()) {

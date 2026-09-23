@@ -8,20 +8,27 @@ service cloud.firestore {
     //
     // This prototype security rules file assumes the following data structure:
     //
-    // Collection: publishedLessons
-    // Document ID: starter-basque-greetings
+    // Collection: lessons
+    // Document ID: {lessonId}
     // Fields:
-    //   - id: string (required, immutable, must equal document ID)
+    //   - id: string (required, immutable in practice, must equal document ID)
     //   - title: string (required, 3..120 chars)
     //   - description: string (required, 10..280 chars)
     //   - level: string (required, 2..40 chars)
     //   - estimatedMinutes: number (required, 1..30)
     //   - demoLabel: string (required, 3..160 chars)
     //   - version: string (required, 1..40 chars)
-    //   - published: boolean (required, must be true for learner reads)
-    //   - publishedAt: ISO 8601 string (required)
-    //   - challenges: list (required, currently reviewed and published by a
-    //     privileged workflow outside client write access)
+    //   - supportedChallengeTypes: list (required, 1..2 items from flashcard/multiple-choice)
+    //   - challenges: list (required, 1..12 items)
+    //   - published: boolean (required, learner-readable only when true)
+    //   - createdAt: ISO 8601 string (required)
+    //   - updatedAt: ISO 8601 string (required)
+    //   - publishedAt: ISO 8601 string|null (required)
+    //   - removedAt: ISO 8601 string|null (required)
+    //
+    // Collection: publishedLessons (legacy starter lesson fallback)
+    // Document ID: starter-basque-greetings
+    // Fields mirror the published lesson shape consumed by the learner app.
     //
     // Collection: learnerProgress
     // Document ID: {userId} (must equal request.auth.uid)
@@ -29,19 +36,10 @@ service cloud.firestore {
     //   - uid: string (required, immutable, must equal document ID)
     //   - updatedAt: ISO 8601 string (required)
     //   - streakDays: number (required, 0..3650)
-    //   - totalXp: number (required, 0 or 15 for the current published lesson)
-    //   - lessonsCompleted: number (required, 0 or 1 for the current published lesson)
+    //   - totalXp: number (required, 0..150000)
+    //   - lessonsCompleted: number (required, 0..10000)
     //   - currentPathLabel: string (required, 1..60 chars)
-    //   - lessonSummaries: map (required, only starter-basque-greetings is allowed)
-    //
-    // Nested lessonSummaries.starter-basque-greetings fields:
-    //   - lessonId: string (required, must equal starter-basque-greetings)
-    //   - lessonVersion: string (required, 1..40 chars)
-    //   - title: string (required, 1..120 chars)
-    //   - stepsCompleted: number (required, 4 for the current published lesson)
-    //   - totalSteps: number (required, 4 for the current published lesson)
-    //   - bestScore: number (required, 0..2)
-    //   - lastPlayedAt: ISO 8601 string (required)
+    //   - lessonSummaries: map (required, up to 50 entries preserved for learner history)
     //
     // Collection: users
     // Document ID: {userId} (must equal Firebase Auth UID)
@@ -114,69 +112,67 @@ service cloud.firestore {
       return value is string &&
         value.size() >= 20 &&
         value.size() <= 40 &&
-        value.matches("^\\\\d{4}-\\\\d{2}-\\\\d{2}T\\\\d{2}:\\\\d{2}:\\\\d{2}.*Z$");
+        value.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*Z$");
     }
 
-    function hasStarterLesson() {
-      return 'starter-basque-greetings' in request.resource.data.lessonSummaries;
+    function isNullableIsoDateString(value) {
+      return value == null || isValidIsoDateString(value);
     }
 
-    function isValidStarterLessonSummary(summary) {
-      return summary is map &&
-        summary.keys().hasAll([
-          'lessonId',
-          'lessonVersion',
+    function hasReadableLessonFields() {
+      return resource.data.keys().hasAll([
+          'id',
           'title',
-          'stepsCompleted',
-          'totalSteps',
-          'bestScore',
-          'lastPlayedAt',
+          'description',
+          'level',
+          'estimatedMinutes',
+          'demoLabel',
+          'version',
+          'supportedChallengeTypes',
+          'challenges',
+          'published',
         ]) &&
-        summary.keys().hasOnly([
-          'lessonId',
-          'lessonVersion',
-          'title',
-          'stepsCompleted',
-          'totalSteps',
-          'bestScore',
-          'lastPlayedAt',
-        ]) &&
-        summary.lessonId == 'starter-basque-greetings' &&
-        summary.lessonVersion is string &&
-        summary.lessonVersion.size() >= 1 &&
-        summary.lessonVersion.size() <= 40 &&
-        summary.title is string &&
-        summary.title.size() >= 1 &&
-        summary.title.size() <= 120 &&
-        summary.stepsCompleted is number &&
-        summary.stepsCompleted == 4 &&
-        summary.totalSteps is number &&
-        summary.totalSteps == 4 &&
-        summary.bestScore is number &&
-        summary.bestScore >= 0 &&
-        summary.bestScore <= 2 &&
-        isValidIsoDateString(summary.lastPlayedAt);
+        resource.data.id is string &&
+        resource.data.id.size() >= 3 &&
+        resource.data.id.size() <= 80 &&
+        resource.data.title is string &&
+        resource.data.title.size() >= 3 &&
+        resource.data.title.size() <= 120 &&
+        resource.data.description is string &&
+        resource.data.description.size() >= 10 &&
+        resource.data.description.size() <= 280 &&
+        resource.data.level is string &&
+        resource.data.level.size() >= 2 &&
+        resource.data.level.size() <= 40 &&
+        resource.data.estimatedMinutes is number &&
+        resource.data.estimatedMinutes >= 1 &&
+        resource.data.estimatedMinutes <= 30 &&
+        resource.data.demoLabel is string &&
+        resource.data.demoLabel.size() >= 3 &&
+        resource.data.demoLabel.size() <= 160 &&
+        resource.data.version is string &&
+        resource.data.version.size() >= 1 &&
+        resource.data.version.size() <= 40 &&
+        resource.data.supportedChallengeTypes is list &&
+        resource.data.supportedChallengeTypes.size() >= 1 &&
+        resource.data.supportedChallengeTypes.size() <= 2 &&
+        resource.data.challenges is list &&
+        resource.data.challenges.size() >= 1 &&
+        resource.data.challenges.size() <= 12;
+    }
+
+    function isReadablePublishedLesson(lessonId) {
+      return hasReadableLessonFields() &&
+        resource.data.id == lessonId &&
+        resource.data.published == true &&
+        isNullableIsoDateString(resource.data.publishedAt) &&
+        isNullableIsoDateString(resource.data.removedAt) &&
+        resource.data.removedAt == null;
     }
 
     function isValidLessonSummaries() {
       return request.resource.data.lessonSummaries is map &&
-        request.resource.data.lessonSummaries.keys().hasOnly(['starter-basque-greetings']) &&
-        (
-          !hasStarterLesson() ||
-          isValidStarterLessonSummary(request.resource.data.lessonSummaries['starter-basque-greetings'])
-        );
-    }
-
-    function isValidProgressCounts() {
-      return (
-        hasStarterLesson() &&
-        request.resource.data.lessonsCompleted == 1 &&
-        request.resource.data.totalXp == 15
-      ) || (
-        !hasStarterLesson() &&
-        request.resource.data.lessonsCompleted == 0 &&
-        request.resource.data.totalXp == 0
-      );
+        request.resource.data.lessonSummaries.keys().size() <= 50;
     }
 
     function isValidUserProfile(userId) {
@@ -239,34 +235,24 @@ service cloud.firestore {
         request.resource.data.streakDays >= 0 &&
         request.resource.data.streakDays <= 3650 &&
         request.resource.data.lessonsCompleted is number &&
-        (
-          request.resource.data.lessonsCompleted == 0 ||
-          request.resource.data.lessonsCompleted == 1
-        ) &&
+        request.resource.data.lessonsCompleted >= 0 &&
+        request.resource.data.lessonsCompleted <= 10000 &&
         request.resource.data.totalXp is number &&
-        (
-          request.resource.data.totalXp == 0 ||
-          request.resource.data.totalXp == 15
-        ) &&
+        request.resource.data.totalXp >= 0 &&
+        request.resource.data.totalXp <= 150000 &&
         request.resource.data.currentPathLabel is string &&
         request.resource.data.currentPathLabel.size() >= 1 &&
         request.resource.data.currentPathLabel.size() <= 60 &&
-        isValidLessonSummaries() &&
-        isValidProgressCounts();
+        isValidLessonSummaries();
     }
 
-    function isReadablePublishedStarterLesson(lessonId) {
-      return lessonId == 'starter-basque-greetings' &&
-        resource.data.id == lessonId &&
-        resource.data.published == true &&
-        resource.data.version is string &&
-        resource.data.version.size() >= 1 &&
-        resource.data.version.size() <= 40 &&
-        isValidIsoDateString(resource.data.publishedAt);
+    match /lessons/{lessonId} {
+      allow read: if isAdmin() || (isAuthenticated() && isReadablePublishedLesson(lessonId));
+      allow create, update, delete: if false;
     }
 
     match /publishedLessons/{lessonId} {
-      allow read: if isAuthenticated() && isReadablePublishedStarterLesson(lessonId);
+      allow read: if isAuthenticated() && isReadablePublishedLesson(lessonId);
       allow create, update, delete: if false;
     }
 
