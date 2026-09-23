@@ -7,7 +7,7 @@ import { AuthService, LearnerSession } from './auth';
 import { LearnerProgressService } from './learner-progress';
 
 const firestoreMocks = vi.hoisted(() => ({
-  getFirestore: vi.fn(() => ({} as Firestore)),
+  getFirestore: vi.fn(() => ({}) as Firestore),
   doc: vi.fn((_firestore: Firestore, collectionPath: string, documentId: string) => ({
     collectionPath,
     documentId,
@@ -36,8 +36,10 @@ describe('LearnerProgressService', () => {
           provide: FIREBASE_SERVICES,
           useValue: {
             app: null,
+            appCheck: null,
             auth: null,
             firestore: mockFirestore,
+            appCheckEnabled: false,
             isConfigured: true,
             ...options,
           } satisfies FirebaseServices,
@@ -68,6 +70,7 @@ describe('LearnerProgressService', () => {
     const awardedXp = service.recordLessonCompletion(
       'starter-basque-greetings',
       'Basque greetings',
+      'v1',
       4,
       2,
     );
@@ -88,13 +91,18 @@ describe('LearnerProgressService', () => {
         uid: 'learner-a',
         totalXp: 15,
         lessonsCompleted: 1,
+        lessonSummaries: {
+          'starter-basque-greetings': expect.objectContaining({
+            lessonVersion: 'v1',
+          }),
+        },
       }),
     );
   });
 
   it('updates the best score on replay without awarding first-completion xp twice', async () => {
-    service.recordLessonCompletion('starter-basque-greetings', 'Basque greetings', 4, 1);
-    service.recordLessonCompletion('starter-basque-greetings', 'Basque greetings', 4, 2);
+    service.recordLessonCompletion('starter-basque-greetings', 'Basque greetings', 'v1', 4, 1);
+    service.recordLessonCompletion('starter-basque-greetings', 'Basque greetings', 'v1', 4, 2);
 
     await vi.waitFor(() => expect(firestoreMocks.setDoc).toHaveBeenCalledTimes(2));
 
@@ -122,6 +130,7 @@ describe('LearnerProgressService', () => {
         lessonSummaries: {
           'starter-basque-greetings': {
             lessonId: 'starter-basque-greetings',
+            lessonVersion: 'v1',
             title: 'Basque greetings',
             stepsCompleted: 4,
             totalSteps: 4,
@@ -150,11 +159,13 @@ describe('LearnerProgressService', () => {
       throw new Error('permission-denied');
     });
 
-    service.recordLessonCompletion('starter-basque-greetings', 'Basque greetings', 4, 2);
+    service.recordLessonCompletion('starter-basque-greetings', 'Basque greetings', 'v1', 4, 2);
 
     expect(service.progress().lessonsCompleted).toBe(1);
     expect(service.progress().totalXp).toBe(15);
-    expect(localStorage.getItem('bask.learnerProgress:learner-a')).toContain('starter-basque-greetings');
+    expect(localStorage.getItem('bask.learnerProgress:learner-a')).toContain(
+      'starter-basque-greetings',
+    );
     await vi.waitFor(() => expect(firestoreMocks.setDoc).toHaveBeenCalledTimes(1));
 
     await vi.waitFor(() =>
@@ -163,7 +174,7 @@ describe('LearnerProgressService', () => {
   });
 
   it('clears the previous learner progress from the visible dashboard on sign-out', async () => {
-    service.recordLessonCompletion('starter-basque-greetings', 'Basque greetings', 4, 1);
+    service.recordLessonCompletion('starter-basque-greetings', 'Basque greetings', 'v1', 4, 1);
     await vi.waitFor(() => expect(firestoreMocks.setDoc).toHaveBeenCalledTimes(1));
 
     learnerSignal.set(null);
@@ -175,7 +186,7 @@ describe('LearnerProgressService', () => {
   });
 
   it('keeps progress isolated per authenticated learner on the same device', async () => {
-    service.recordLessonCompletion('starter-basque-greetings', 'Basque greetings', 4, 1);
+    service.recordLessonCompletion('starter-basque-greetings', 'Basque greetings', 'v1', 4, 1);
     await vi.waitFor(() => expect(firestoreMocks.setDoc).toHaveBeenCalledTimes(1));
 
     learnerSignal.set({

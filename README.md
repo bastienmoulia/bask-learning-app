@@ -1,13 +1,14 @@
 # Bask Learning App
 
-Bask is an Angular MVP for learning Basque from scratch with a playful, Duolingo-inspired experience. This version focuses on a clean foundation: a dashboard, a short starter lesson, Firebase Authentication, and local progress scoped to each signed-in learner.
+Bask is an Angular MVP for learning Basque from scratch with a playful, Duolingo-inspired experience. This version focuses on a clean foundation: a dashboard, a published starter lesson, Firebase Authentication, Firestore-backed learner progress, and optional AI-assisted extra practice.
 
 ## Current MVP scope
 
 - Responsive home/dashboard screen introducing the product concept
-- Starter Basque lesson with demo flashcards and multiple-choice practice
+- Published starter Basque lesson loaded from Firestore with a reviewed local fallback
 - Firebase Authentication with email/password, Google, and Apple sign-in flows
-- Local learner progress persistence scoped to the authenticated Firebase user
+- Firestore-backed learner progress persistence scoped to the authenticated Firebase user
+- Optional AI-assisted extra practice with App Check protection and client-side rate limiting
 - Angular unit tests for the starter lesson flow and key services
 
 ## Prerequisites
@@ -66,6 +67,24 @@ export const environment = {
 
 Enable the Email/Password, Google, and Apple providers in Firebase Authentication before testing those sign-in flows.
 
+### Published lesson content
+
+Create a Firestore document at `publishedLessons/starter-basque-greetings` with the same shape as
+`src/app/features/lesson-player/starter-lesson.ts` if you want the app to read reviewed lesson
+content from Firestore. If the document is missing or invalid, the app falls back to the reviewed
+local lesson bundled with the client.
+
+### App Check and personalized practice
+
+Personalized practice is optional and only runs when:
+
+- `environment.appCheck.siteKey` is configured for web App Check
+- Firebase AI Logic is provisioned for the project
+- the learner stays within the configured hourly request limit
+
+The default local configuration keeps these values empty, so the published lesson still works even
+when personalized generation is unavailable.
+
 ## Project structure
 
 ```text
@@ -73,10 +92,10 @@ src/
   app/
     core/
       firebase/          # safe Firebase bootstrap helpers
-      services/          # auth and learner progress abstractions
+      services/          # auth, lesson loading, progress, and practice abstractions
     features/
       home/              # dashboard experience
-      lesson-player/     # first starter lesson flow + demo content
+      lesson-player/     # published lesson flow + validated extra practice
   environments/
     environment.ts       # Firebase placeholders (no secrets)
 ```
@@ -92,8 +111,9 @@ npm test -- --watch=false
 The initial test coverage focuses on:
 
 - Firebase auth restoration and sign-in errors
-- local learner progress recording per authenticated learner
-- completion of the starter greetings lesson
+- learner progress recording per authenticated learner
+- loading published lesson content with fallback
+- completion of the starter greetings lesson and validated extra practice flow
 
 ## iOS TestFlight deployment
 
@@ -118,6 +138,6 @@ Run **Deploy iOS to TestFlight** from the repository Actions tab. Each run sets 
 - payments or subscriptions
 - analytics
 - a full Basque curriculum
-- real Firestore persistence logic
+- an admin publishing workflow for lesson content
 
 Those areas can be added later on top of the current Angular structure and Firebase-ready abstractions.

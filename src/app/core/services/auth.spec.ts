@@ -58,8 +58,10 @@ describe('AuthService', () => {
           provide: FIREBASE_SERVICES,
           useValue: {
             app: null,
+            appCheck: null,
             auth: mockAuth,
             firestore: null,
+            appCheckEnabled: false,
             isConfigured: true,
             ...options,
           } satisfies FirebaseServices,
