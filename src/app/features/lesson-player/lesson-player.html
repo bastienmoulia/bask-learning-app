@@ -35,9 +35,7 @@
 
     @if (!isComplete() && currentChallenge(); as challenge) {
       <article class="challenge-card surface">
-        <p class="eyebrow">
-          Step {{ currentIndex() + 1 }} of {{ lesson.challenges.length }}
-        </p>
+        <p class="eyebrow">Step {{ currentIndex() + 1 }} of {{ lesson.challenges.length }}</p>
         <h2>{{ challenge.prompt }}</h2>
 
         @if (challenge.type === 'flashcard') {
