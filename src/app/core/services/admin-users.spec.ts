@@ -35,6 +35,7 @@ const firebaseFunctionsMocks = vi.hoisted(() => {
 
   return {
     callable,
+    getFunctions: vi.fn(() => ({} as Functions)),
     httpsCallable: vi.fn(() => callable),
   };
 });

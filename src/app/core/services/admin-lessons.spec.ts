@@ -64,6 +64,7 @@ const firebaseFunctionsMocks = vi.hoisted(() => {
     generateCallable,
     upsertCallable,
     removeCallable,
+    getFunctions: vi.fn(() => ({} as Functions)),
     httpsCallable: vi.fn((_functions: Functions, name: string) => {
       if (name === 'generateLessonDraft') {
         return generateCallable;
