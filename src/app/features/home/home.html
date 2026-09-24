@@ -1,6 +1,6 @@
 <section class="hero">
   <div class="hero__copy">
-    <span class="hero__eyebrow">Playful language learning · published starter lesson</span>
+    <span class="hero__eyebrow">Playful language learning · published lesson catalog</span>
     <h1>Learn Basque from scratch through tiny wins, games, and streaks.</h1>
     <p>
       Bask is a Duolingo-inspired starter app for absolute beginners. Sign in with Firebase to keep
@@ -8,7 +8,7 @@
     </p>
 
     <div class="hero__actions">
-      <a class="button button--primary" routerLink="/lesson/starter-basque-greetings">
+      <a class="button button--primary" [routerLink]="['/lesson', starterLesson.id]">
         Start the first lesson
       </a>
       <a class="button button--secondary" href="#mvp-overview">See MVP scope</a>
@@ -66,17 +66,26 @@
   </section>
 }
 
+@if (catalogFeedback(); as catalogFeedback) {
+  <section class="card" aria-live="polite">
+    <strong>Published lesson catalog</strong>
+    <p>{{ catalogFeedback }}</p>
+  </section>
+}
+
 <section class="dashboard-grid" id="mvp-overview">
   <article class="card">
-    <h2>Starter lesson path</h2>
-    <p>{{ starterLesson.description }}</p>
+    <h2>Published lessons</h2>
+    <p>Published lessons are visible to learners here only after an administrator reviews them.</p>
     <ul>
-      <li>Flashcards for “Kaixo” and “Agur”</li>
-      <li>Two quick multiple-choice checks</li>
-      <li>Completion summary saved to your learner account with lesson version tracking</li>
-      <li>Optional AI-assisted extra practice after the published lesson</li>
+      @for (lesson of publishedLessons(); track lesson.id) {
+        <li>
+          <a [routerLink]="['/lesson', lesson.id]">{{ lesson.title }}</a>
+          <div>{{ lesson.estimatedMinutes }} minutes · {{ lesson.level }}</div>
+          <p>{{ lesson.description }}</p>
+        </li>
+      }
     </ul>
-    <p class="demo-note">{{ starterLesson.demoLabel }}</p>
   </article>
 
   <article class="card">

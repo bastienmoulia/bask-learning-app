@@ -14,7 +14,7 @@ export const routes: Routes = [
       import('./features/sign-in/sign-in').then((module) => module.SignInComponent),
   },
   {
-    path: 'lesson/starter-basque-greetings',
+    path: 'lesson/:lessonId',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/lesson-player/lesson-player').then(

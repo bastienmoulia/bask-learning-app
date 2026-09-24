@@ -134,6 +134,7 @@ describe('LessonPlayerComponent', () => {
         estimatedMinutes: 3,
         demoLabel: 'Validated AI-generated practice.',
         version: 'practice-v1',
+        supportedChallengeTypes: ['multiple-choice'],
         basedOnLessonId: starterLesson.id,
         basedOnLessonVersion: starterLesson.version,
         challenges: starterLesson.challenges.slice(2),

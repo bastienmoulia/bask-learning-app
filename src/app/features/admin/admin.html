@@ -47,3 +47,196 @@
     </ul>
   }
 </section>
+
+<section>
+  <span>Lesson workspace</span>
+  <h2>Create, review, and publish lessons</h2>
+  <p>
+    Generate a lesson draft with AI assistance, review it, then save or publish only after your own
+    edits. Removing a lesson only hides it from the learner catalog and keeps any learner history
+    that already references it.
+  </p>
+
+  @if (lessonFeedback(); as feedbackMessage) {
+    <p aria-live="polite">{{ feedbackMessage.text }}</p>
+  }
+
+  <div>
+    <h3>AI-assisted draft brief</h3>
+    <label>
+      Topic
+      <input [(ngModel)]="generationRequest.topic" type="text" />
+    </label>
+    <label>
+      Learner level
+      <input [(ngModel)]="generationRequest.level" type="text" />
+    </label>
+    <label>
+      Learning goals
+      <textarea [(ngModel)]="generationRequest.learningGoals" rows="4"></textarea>
+    </label>
+    <button type="button" [disabled]="isGeneratingLesson()" (click)="generateDraft()">
+      {{ isGeneratingLesson() ? 'Generating…' : 'Generate lesson draft' }}
+    </button>
+    <button type="button" (click)="startNewLesson()">Start a blank draft</button>
+  </div>
+
+  @if (draftValidationErrors.length) {
+    <div aria-live="polite">
+      <strong>Fix these lesson issues before saving or publishing:</strong>
+      <ul>
+        @for (error of draftValidationErrors; track error) {
+          <li>{{ error }}</li>
+        }
+      </ul>
+    </div>
+  }
+
+  <div>
+    <h3>Lesson editor</h3>
+    <label>
+      Lesson id
+      <input [(ngModel)]="draft.id" type="text" />
+    </label>
+    <label>
+      Title
+      <input [(ngModel)]="draft.title" type="text" (blur)="ensureLessonIdFromTitle()" />
+    </label>
+    <label>
+      Description
+      <textarea [(ngModel)]="draft.description" rows="3"></textarea>
+    </label>
+    <label>
+      Level
+      <input [(ngModel)]="draft.level" type="text" />
+    </label>
+    <label>
+      Estimated minutes
+      <input [(ngModel)]="draft.estimatedMinutes" type="number" min="1" max="30" />
+    </label>
+    <label>
+      Admin note
+      <input [(ngModel)]="draft.demoLabel" type="text" />
+    </label>
+    <label>
+      Version
+      <input [(ngModel)]="draft.version" type="text" />
+    </label>
+
+    <fieldset>
+      <legend>Supported challenge types</legend>
+      @for (type of supportedChallengeTypes; track type) {
+        <label>
+          <input
+            type="checkbox"
+            [checked]="draft.supportedChallengeTypes.includes(type)"
+            (change)="toggleSupportedChallengeType(type)"
+          />
+          {{ type }}
+        </label>
+      }
+    </fieldset>
+
+    <div>
+      <h4>Challenges</h4>
+      <button type="button" (click)="addFlashcardChallenge()">Add flashcard</button>
+      <button type="button" (click)="addMultipleChoiceChallenge()">Add multiple-choice</button>
+
+      @for (challenge of draft.challenges; track challenge.id; let index = $index) {
+        <article>
+          <div>
+            <strong>{{ challenge.type }}</strong>
+            <button type="button" (click)="removeChallenge(index)">Remove</button>
+          </div>
+
+          <label>
+            Challenge id
+            <input [(ngModel)]="challenge.id" type="text" />
+          </label>
+          <label>
+            Prompt
+            <input [(ngModel)]="challenge.prompt" type="text" />
+          </label>
+
+          @if (challenge.type === 'flashcard') {
+            <label>
+              Basque text
+              <input [(ngModel)]="challenge.basque" type="text" />
+            </label>
+            <label>
+              English text
+              <input [(ngModel)]="challenge.english" type="text" />
+            </label>
+          } @else {
+            <label>
+              Question
+              <input [(ngModel)]="challenge.question" type="text" />
+            </label>
+
+            <div>
+              <strong>Options</strong>
+              @for (option of challenge.options; track $index; let optionIndex = $index) {
+                <div>
+                  <input [(ngModel)]="challenge.options[optionIndex]" type="text" />
+                  <button type="button" (click)="removeOption(challenge, optionIndex)">
+                    Remove option
+                  </button>
+                </div>
+              }
+              <button type="button" (click)="addOption(challenge)">Add option</button>
+            </div>
+
+            <label>
+              Correct answer
+              <input [(ngModel)]="challenge.answer" type="text" />
+            </label>
+            <label>
+              Explanation
+              <textarea [(ngModel)]="challenge.explanation" rows="2"></textarea>
+            </label>
+          }
+        </article>
+      }
+    </div>
+
+    <div>
+      <button type="button" [disabled]="activeLessonId() === draft.id" (click)="saveDraft()">
+        Save draft
+      </button>
+      <button type="button" [disabled]="activeLessonId() === draft.id" (click)="publishDraft()">
+        Publish lesson
+      </button>
+    </div>
+  </div>
+
+  <div>
+    <h3>Existing lessons</h3>
+    @if (isLessonsLoading()) {
+      <p>Loading the lesson workspace…</p>
+    } @else if (!lessons().length) {
+      <p>No lessons have been saved yet.</p>
+    } @else {
+      <ul>
+        @for (lesson of lessons(); track lesson.id) {
+          <li>
+            <strong>{{ lesson.title }}</strong>
+            <div>{{ lessonStatus(lesson) }} · {{ lesson.level }} · {{ lesson.estimatedMinutes }} min</div>
+            <div>Version: {{ lesson.version }}</div>
+            <div>Updated: {{ lesson.updatedAt | date: 'medium' }}</div>
+            <button type="button" (click)="editLesson(lesson)">Edit</button>
+            <button
+              type="button"
+              [disabled]="activeLessonId() === lesson.id"
+              (click)="removeLesson(lesson)"
+            >
+              Remove from learner catalog
+            </button>
+            @if (isEditingLesson(lesson)) {
+              <span>Currently loaded in the editor.</span>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

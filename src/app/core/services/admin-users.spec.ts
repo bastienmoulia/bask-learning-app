@@ -13,6 +13,7 @@ const firebaseFirestoreMocks = vi.hoisted(() => {
     | undefined;
 
   return {
+    getFirestore: vi.fn(() => ({} as Firestore)),
     usersSnapshotCallback: () => usersSnapshotCallback,
     collection: vi.fn(),
     orderBy: vi.fn((field: string) => field),
@@ -34,6 +35,7 @@ const firebaseFunctionsMocks = vi.hoisted(() => {
 
   return {
     callable,
+    getFunctions: vi.fn(() => ({} as Functions)),
     httpsCallable: vi.fn(() => callable),
   };
 });

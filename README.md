@@ -9,6 +9,7 @@ Bask is an Angular MVP for learning Basque from scratch with a playful, Duolingo
 - Firebase Authentication with email/password, Google, and Apple sign-in flows
 - Firestore-backed learner progress persistence scoped to the authenticated Firebase user
 - Firestore-backed user profiles with learner/admin roles and an admin management screen
+- Admin lesson drafting, editing, publishing, and catalog removal with trusted backend checks
 - Optional AI-assisted extra practice with App Check protection and client-side rate limiting
 - Angular unit tests for the starter lesson flow and key services
 
@@ -88,10 +89,21 @@ setup step after the first account has been created in Firebase Authentication.
 
 ### Published lesson content
 
-Create a Firestore document at `publishedLessons/starter-basque-greetings` with the same shape as
-`src/app/features/lesson-player/starter-lesson.ts` if you want the app to read reviewed lesson
-content from Firestore. If the document is missing or invalid, the app falls back to the reviewed
-local lesson bundled with the client.
+Administrators can now manage lessons from the `/admin` screen. Reviewed lesson documents live in
+`lessons/{lessonId}` and only documents with `published: true` are visible to learners in the home
+lesson catalog. Removing a lesson from the catalog keeps the lesson document and any learner progress
+that already references it.
+
+The starter lesson in `src/app/features/lesson-player/starter-lesson.ts` remains the local fallback
+for demo mode and for the legacy `publishedLessons/starter-basque-greetings` Firestore document.
+
+### Trusted AI lesson drafting
+
+The admin lesson generator runs through a callable Cloud Function so Firebase Auth can verify that
+only administrators request lesson drafts. To enable Gemini-backed lesson drafting in your Firebase
+Functions environment, provide a `GEMINI_API_KEY` secret or environment variable for the functions
+runtime. Without it, the admin screen still returns a structured reviewable draft scaffold instead of
+a live AI response.
 
 ### App Check and personalized practice
 
@@ -157,6 +169,6 @@ Run **Deploy iOS to TestFlight** from the repository Actions tab. Each run sets 
 - payments or subscriptions
 - analytics
 - a full Basque curriculum
-- an admin publishing workflow for lesson content beyond role management
+- advanced lesson version history or rollback tooling
 
 Those areas can be added later on top of the current Angular structure and Firebase-ready abstractions.
