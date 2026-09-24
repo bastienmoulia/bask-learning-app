@@ -1,6 +1,6 @@
 <section class="hero">
-  <div class="hero__copy">
-    <span class="hero__eyebrow">Playful language learning · published lesson catalog</span>
+  <div class="hero__copy surface">
+    <span class="eyebrow">Playful language learning · published lesson catalog</span>
     <h1>Learn Basque from scratch through tiny wins, games, and streaks.</h1>
     <p>
       Bask is a Duolingo-inspired starter app for absolute beginners. Sign in with Firebase to keep
@@ -23,13 +23,13 @@
   </div>
 
   <aside class="hero__panel" aria-label="Learner overview">
-    <div class="panel-card">
-      <p class="panel-card__label">Current learner</p>
+    <div class="panel-card surface">
+      <p class="eyebrow">Current learner</p>
       <strong>{{ learner()?.displayName ?? 'Learner' }}</strong>
       <span>{{ learner()?.email ?? 'Signed in with a Firebase provider' }}</span>
     </div>
-    <div class="panel-card panel-card--accent">
-      <p class="panel-card__label">Next up</p>
+    <div class="panel-card panel-card--accent surface">
+      <p class="eyebrow">Next up</p>
       <strong>{{ starterLesson.title }}</strong>
       <span>{{ starterLesson.estimatedMinutes }} minutes · {{ starterLesson.level }}</span>
     </div>
@@ -37,44 +37,44 @@
 </section>
 
 <section class="stats-grid" aria-label="Progress highlights">
-  <article>
-    <span>🔥 Streak</span>
+  <article class="surface">
+    <span class="eyebrow">🔥 Streak</span>
     <strong>{{ progress().streakDays }} days</strong>
     <p>Daily practice becomes a habit with simple, bite-sized sessions.</p>
   </article>
-  <article>
-    <span>⭐ XP</span>
+  <article class="surface">
+    <span class="eyebrow">⭐ XP</span>
     <strong>{{ progress().totalXp }}</strong>
     <p>Earn points as you complete demo lessons and future challenge types.</p>
   </article>
-  <article>
-    <span>🧭 Path</span>
+  <article class="surface">
+    <span class="eyebrow">🧭 Path</span>
     <strong>{{ progress().currentPathLabel }}</strong>
     <p>The first learning path starts with greetings and everyday basics.</p>
   </article>
-  <article>
-    <span>📈 Course progress</span>
+  <article class="surface">
+    <span class="eyebrow">📈 Course progress</span>
     <strong>{{ completionRate() }}%</strong>
     <p>Progress syncs to your Firebase account, with local device fallback if sync is unavailable.</p>
   </article>
 </section>
 
 @if (syncFeedback(); as syncFeedback) {
-  <section class="card" aria-live="polite">
+  <section class="card surface" aria-live="polite">
     <strong>Progress sync needs attention</strong>
     <p>{{ syncFeedback.text }}</p>
   </section>
 }
 
 @if (catalogFeedback(); as catalogFeedback) {
-  <section class="card" aria-live="polite">
+  <section class="card surface" aria-live="polite">
     <strong>Published lesson catalog</strong>
     <p>{{ catalogFeedback }}</p>
   </section>
 }
 
 <section class="dashboard-grid" id="mvp-overview">
-  <article class="card">
+  <article class="card surface">
     <h2>Published lessons</h2>
     <p>Published lessons are visible to learners here only after an administrator reviews them.</p>
     <ul>
@@ -88,7 +88,7 @@
     </ul>
   </article>
 
-  <article class="card">
+  <article class="card surface">
     <h2>Progress snapshot</h2>
     @if (progressSummary(); as lessonProgress) {
       <dl>
@@ -110,7 +110,7 @@
     }
   </article>
 
-  <article class="card">
+  <article class="card surface">
     <h2>Authenticated learning foundation</h2>
     <p>
       Firebase Authentication gates the lesson flow, restores sessions after restart, and keeps

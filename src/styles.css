@@ -48,21 +48,16 @@
 
   --shadow-card: 0 18px 36px rgb(22 50 79 / 8%);
   --shadow-primary: 0 12px 20px rgb(15 138 71 / 26%);
-  --shadow-primary-soft: 0 12px 20px rgb(15 138 71 / 22%);
   --shadow-badge: 0 10px 24px rgb(28 216 111 / 24%);
 
   --radius-sm: 1rem;
-  --radius-md: 18px;
-  --radius-lg: 24px;
-  --radius-xl: 28px;
+  --radius-md: 1.125rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 1.75rem;
   --radius-pill: 999px;
 
   --space-page: clamp(1rem, 3vw, 2rem);
   --transition-fast: 0.18s ease;
-}
-
-html {
-  scroll-behavior: smooth;
 }
 
 body {
@@ -80,17 +75,94 @@ body {
   box-sizing: border-box;
 }
 
-button,
-a {
-  transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast),
-    background var(--transition-fast);
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  button,
+  a {
+    transition:
+      transform var(--transition-fast),
+      box-shadow var(--transition-fast),
+      background var(--transition-fast);
+  }
+
+  button:hover,
+  button:focus-visible,
+  a:hover,
+  a:focus-visible {
+    transform: translateY(-1px);
+  }
 }
 
-button:hover,
-button:focus-visible,
-a:hover,
-a:focus-visible {
-  transform: translateY(-1px);
+.surface {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+.eyebrow {
+  color: var(--color-primary);
+  font-size: var(--font-size-eyebrow);
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-eyebrow);
+  text-transform: uppercase;
+}
+
+.demo-note {
+  background: var(--color-surface-note);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+}
+
+.button {
+  align-items: center;
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 700;
+  justify-content: center;
+  padding: 0.95rem 1.25rem;
+  text-decoration: none;
+}
+
+.button:disabled {
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
+.button--primary {
+  background: var(--gradient-primary);
+  box-shadow: var(--shadow-primary);
+  color: var(--color-on-primary);
+}
+
+.button--secondary {
+  background: var(--color-surface-soft);
+  color: var(--color-text-secondary);
+}
+
+.button--ghost {
+  background: transparent;
+  color: var(--color-text-tertiary);
+  justify-content: flex-start;
+  padding-inline: 0;
+}
+
+.sr-only {
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
 }

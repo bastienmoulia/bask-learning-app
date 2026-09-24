@@ -1,14 +1,14 @@
 <section class="lesson-shell">
   @if (isLoadingLesson()) {
-    <article class="challenge-card">
-      <span class="lesson-badge">Loading</span>
+    <article class="challenge-card surface">
+      <span class="eyebrow">Loading</span>
       <h2>Getting your published lesson ready…</h2>
       <p>We are loading the latest reviewed lesson content before the practice session starts.</p>
     </article>
   } @else if (lesson(); as lesson) {
-    <header class="lesson-header">
+    <header class="lesson-header surface">
       <a class="back-link" routerLink="/">← Back to dashboard</a>
-      <span class="lesson-badge">{{ lesson.level }}</span>
+      <span class="eyebrow">{{ lesson.level }}</span>
       <h1>{{ lesson.title }}</h1>
       <p>{{ lesson.description }}</p>
       <p class="demo-note">{{ lesson.demoLabel }}</p>
@@ -34,8 +34,8 @@
     </div>
 
     @if (!isComplete() && currentChallenge(); as challenge) {
-      <article class="challenge-card">
-        <p class="challenge-card__eyebrow">
+      <article class="challenge-card surface">
+        <p class="eyebrow">
           Step {{ currentIndex() + 1 }} of {{ lesson.challenges.length }}
         </p>
         <h2>{{ challenge.prompt }}</h2>
@@ -65,7 +65,7 @@
           </button>
 
           <button
-            class="primary-action"
+            class="button button--primary"
             type="button"
             [disabled]="!revealAnswer()"
             (click)="advanceFlashcard()"
@@ -101,7 +101,7 @@
               <p>{{ challenge.explanation }}</p>
             </div>
 
-            <button class="primary-action" type="button" (click)="moveToNextQuestion()">
+            <button class="button button--primary" type="button" (click)="moveToNextQuestion()">
               {{
                 currentIndex() + 1 === lesson.challenges.length ? 'Finish lesson' : 'Next challenge'
               }}
@@ -110,8 +110,8 @@
         }
       </article>
     } @else {
-      <article class="challenge-card challenge-card--complete">
-        <span class="lesson-badge">Lesson complete</span>
+      <article class="challenge-card challenge-card--complete surface">
+        <span class="eyebrow">Lesson complete</span>
         <h2>Oso ondo! Great start.</h2>
         <p>{{ summaryMessage() }}</p>
 
@@ -135,13 +135,13 @@
         </dl>
 
         <div class="completion-actions">
-          <a class="secondary-action" routerLink="/">Return to dashboard</a>
-          <button class="secondary-action" type="button" (click)="replayPublishedLesson()">
+          <a class="button button--secondary" routerLink="/">Return to dashboard</a>
+          <button class="button button--secondary" type="button" (click)="replayPublishedLesson()">
             Replay published lesson
           </button>
           @if (canRequestPractice()) {
             <button
-              class="primary-action"
+              class="button button--primary"
               type="button"
               [disabled]="isGeneratingPractice()"
               (click)="requestPersonalizedPractice()"
@@ -153,11 +153,11 @@
       </article>
     }
   } @else {
-    <article class="challenge-card">
-      <span class="lesson-badge">Unavailable</span>
+    <article class="challenge-card surface">
+      <span class="eyebrow">Unavailable</span>
       <h2>We could not open this lesson right now.</h2>
       <p>{{ loadFeedback() }}</p>
-      <a class="secondary-action" routerLink="/">Return to dashboard</a>
+      <a class="button button--secondary" routerLink="/">Return to dashboard</a>
     </article>
   }
 </section>

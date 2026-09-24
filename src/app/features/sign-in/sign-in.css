@@ -12,10 +12,6 @@
 }
 
 .auth-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
   display: grid;
   gap: 1rem;
   padding: clamp(1.5rem, 4vw, 2.5rem);
@@ -30,14 +26,6 @@
 .auth-card p,
 .auth-field span {
   color: var(--color-text-muted);
-}
-
-.auth-card__eyebrow {
-  color: var(--color-primary);
-  font-size: var(--font-size-eyebrow);
-  font-weight: 700;
-  letter-spacing: var(--letter-spacing-eyebrow);
-  text-transform: uppercase;
 }
 
 .auth-field {
@@ -60,39 +48,6 @@
 
 .auth-actions--stacked {
   flex-direction: column;
-}
-
-.button {
-  border: 0;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
-  font: inherit;
-  font-weight: 700;
-  padding: 0.95rem 1.25rem;
-}
-
-.button:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-  transform: none;
-}
-
-.button--primary {
-  background: var(--gradient-primary);
-  box-shadow: var(--shadow-primary);
-  color: var(--color-on-primary);
-}
-
-.button--secondary {
-  background: var(--color-surface-soft);
-  color: var(--color-text-secondary);
-}
-
-.button--ghost {
-  background: transparent;
-  color: var(--color-text-tertiary);
-  padding-inline: 0;
-  text-align: left;
 }
 
 .auth-feedback {
