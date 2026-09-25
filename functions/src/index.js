@@ -6,12 +6,13 @@ const usersCollection = 'users';
 const lessonsCollection = 'lessons';
 const adminRole = 'admin';
 const learnerRole = 'learner';
+const functionsRegion = 'europe-west1';
 const supportedChallengeTypes = ['flashcard', 'multiple-choice'];
 const lessonIdPattern = /^[a-z0-9-]{3,80}$/;
 const defaultLessonDraftModel = process.env.LESSON_DRAFT_MODEL || 'gemini-3.5-flash-lite';
 
 admin.initializeApp();
-setGlobalOptions({ maxInstances: 10 });
+setGlobalOptions({ maxInstances: 10, region: functionsRegion });
 
 function createUserDocRef(userId) {
   return admin.firestore().collection(usersCollection).doc(userId);

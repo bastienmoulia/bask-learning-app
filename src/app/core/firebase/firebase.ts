@@ -7,6 +7,7 @@ import { Functions, getFunctions } from 'firebase/functions';
 import { environment } from '../../../environments/environment';
 
 export const defaultFirebaseAppName = '[DEFAULT]';
+export const defaultFunctionsRegion = 'europe-west1';
 
 const requiredFirebaseKeys: (keyof FirebaseOptions)[] = [
   'apiKey',
@@ -32,6 +33,10 @@ export const FIREBASE_SERVICES = new InjectionToken<FirebaseServices>('FIREBASE_
 
 export function hasFirebaseConfig(config: Partial<FirebaseOptions>): config is FirebaseOptions {
   return requiredFirebaseKeys.every((key) => Boolean(config[key]?.toString().trim()));
+}
+
+export function getFunctionsRegion(region = environment.functionsRegion) {
+  return region?.trim() || defaultFunctionsRegion;
 }
 
 export function getFirebaseServices(
@@ -62,7 +67,7 @@ export function getFirebaseServices(
     appCheck,
     auth: getAuth(app),
     firestore: getFirestore(app),
-    functions: getFunctions(app),
+    functions: getFunctions(app, getFunctionsRegion()),
     appCheckEnabled: appCheck !== null,
     isConfigured: true,
   };

@@ -2,6 +2,7 @@ import type { FirebaseOptions } from 'firebase/app';
 
 export interface AppEnvironment {
   production: boolean;
+  functionsRegion?: string;
   appCheck?: {
     siteKey?: string;
     debugToken?: string | boolean;
@@ -16,6 +17,7 @@ export interface AppEnvironment {
 
 export const environment: AppEnvironment = {
   production: false,
+  functionsRegion: 'europe-west1',
   appCheck: {},
   ai: {
     practiceModel: 'gemini-3.5-flash-lite',
