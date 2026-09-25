@@ -62,6 +62,7 @@ describe('firebase helpers', () => {
     expect(services.auth).not.toBeNull();
     expect(services.firestore).not.toBeNull();
     expect(services.functions).not.toBeNull();
+    expect(services.functions?.region).toBe(defaultFunctionsRegion);
     expect(services.appCheckEnabled).toBe(false);
 
     await deleteApp(services.app!);
