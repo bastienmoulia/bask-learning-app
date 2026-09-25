@@ -1,242 +1,577 @@
-<section>
-  <span>Administrator access</span>
-  <h1>Manage registered users</h1>
-  <p>
-    Promote trusted learners to administrators or revoke access. Role changes are applied through a
-    trusted backend operation.
-  </p>
+<div class="admin-shell">
+  <section class="surface admin-panel" aria-labelledby="admin-users-title">
+    <header class="admin-panel__header">
+      <span class="eyebrow">Administrator access</span>
+      <h1 id="admin-users-title">Manage registered users</h1>
+      <p>
+        Promote trusted learners to administrators or revoke access. Role changes are applied
+        through a trusted backend operation.
+      </p>
+    </header>
 
-  @if (feedback(); as feedbackMessage) {
-    <p aria-live="polite">{{ feedbackMessage.text }}</p>
-  }
+    @if (feedback(); as feedbackMessage) {
+      <p class="feedback" [class]="'feedback--' + feedbackMessage.kind" aria-live="polite">
+        {{ feedbackMessage.text }}
+      </p>
+    }
 
-  @if (isLoading()) {
-    <p>Loading registered users…</p>
-  } @else if (!users().length) {
-    <p>No registered users are available yet.</p>
-  } @else {
-    <ul>
-      @for (user of users(); track user.uid) {
-        <li>
-          <strong>{{ user.displayName }}</strong>
-          <div>{{ user.email ?? 'No email shared by this provider' }}</div>
-          <div>Role: {{ user.role }}</div>
-          <div>Updated: {{ user.updatedAt | date: 'medium' }}</div>
-
-          @if (isCurrentUser(user)) {
-            <p>Your own access is managed through the backend bootstrap flow.</p>
-          } @else if (user.role === 'learner') {
-            <button
-              type="button"
-              [disabled]="activeUserId() === user.uid"
-              (click)="promote(user)"
-            >
-              Grant admin access
-            </button>
-          } @else {
-            <button
-              type="button"
-              [disabled]="activeUserId() === user.uid"
-              (click)="revoke(user)"
-            >
-              Revoke admin access
-            </button>
-          }
-        </li>
-      }
-    </ul>
-  }
-</section>
-
-<section>
-  <span>Lesson workspace</span>
-  <h2>Create, review, and publish lessons</h2>
-  <p>
-    Generate a lesson draft with AI assistance, review it, then save or publish only after your own
-    edits. Removing a lesson only hides it from the learner catalog and keeps any learner history
-    that already references it.
-  </p>
-
-  @if (lessonFeedback(); as feedbackMessage) {
-    <p aria-live="polite">{{ feedbackMessage.text }}</p>
-  }
-
-  <div>
-    <h3>AI-assisted draft brief</h3>
-    <label>
-      Topic
-      <input [(ngModel)]="generationRequest.topic" type="text" />
-    </label>
-    <label>
-      Learner level
-      <input [(ngModel)]="generationRequest.level" type="text" />
-    </label>
-    <label>
-      Learning goals
-      <textarea [(ngModel)]="generationRequest.learningGoals" rows="4"></textarea>
-    </label>
-    <button type="button" [disabled]="isGeneratingLesson()" (click)="generateDraft()">
-      {{ isGeneratingLesson() ? 'Generating…' : 'Generate lesson draft' }}
-    </button>
-    <button type="button" (click)="startNewLesson()">Start a blank draft</button>
-  </div>
-
-  @if (draftValidationErrors.length) {
-    <div aria-live="polite">
-      <strong>Fix these lesson issues before saving or publishing:</strong>
-      <ul>
-        @for (error of draftValidationErrors; track error) {
-          <li>{{ error }}</li>
-        }
-      </ul>
-    </div>
-  }
-
-  <div>
-    <h3>Lesson editor</h3>
-    <label>
-      Lesson id
-      <input [(ngModel)]="draft.id" type="text" />
-    </label>
-    <label>
-      Title
-      <input [(ngModel)]="draft.title" type="text" (blur)="ensureLessonIdFromTitle()" />
-    </label>
-    <label>
-      Description
-      <textarea [(ngModel)]="draft.description" rows="3"></textarea>
-    </label>
-    <label>
-      Level
-      <input [(ngModel)]="draft.level" type="text" />
-    </label>
-    <label>
-      Estimated minutes
-      <input [(ngModel)]="draft.estimatedMinutes" type="number" min="1" max="30" />
-    </label>
-    <label>
-      Admin note
-      <input [(ngModel)]="draft.demoLabel" type="text" />
-    </label>
-    <label>
-      Version
-      <input [(ngModel)]="draft.version" type="text" />
-    </label>
-
-    <fieldset>
-      <legend>Supported challenge types</legend>
-      @for (type of supportedChallengeTypes; track type) {
-        <label>
-          <input
-            type="checkbox"
-            [checked]="draft.supportedChallengeTypes.includes(type)"
-            (change)="toggleSupportedChallengeType(type)"
-          />
-          {{ type }}
-        </label>
-      }
-    </fieldset>
-
-    <div>
-      <h4>Challenges</h4>
-      <button type="button" (click)="addFlashcardChallenge()">Add flashcard</button>
-      <button type="button" (click)="addMultipleChoiceChallenge()">Add multiple-choice</button>
-
-      @for (challenge of draft.challenges; track challenge.id; let index = $index) {
-        <article>
-          <div>
-            <strong>{{ challenge.type }}</strong>
-            <button type="button" (click)="removeChallenge(index)">Remove</button>
-          </div>
-
-          <label>
-            Challenge id
-            <input [(ngModel)]="challenge.id" type="text" />
-          </label>
-          <label>
-            Prompt
-            <input [(ngModel)]="challenge.prompt" type="text" />
-          </label>
-
-          @if (challenge.type === 'flashcard') {
-            <label>
-              Basque text
-              <input [(ngModel)]="challenge.basque" type="text" />
-            </label>
-            <label>
-              English text
-              <input [(ngModel)]="challenge.english" type="text" />
-            </label>
-          } @else {
-            <label>
-              Question
-              <input [(ngModel)]="challenge.question" type="text" />
-            </label>
-
-            <div>
-              <strong>Options</strong>
-              @for (option of challenge.options; track $index; let optionIndex = $index) {
-                <div>
-                  <input [(ngModel)]="challenge.options[optionIndex]" type="text" />
-                  <button type="button" (click)="removeOption(challenge, optionIndex)">
-                    Remove option
-                  </button>
-                </div>
-              }
-              <button type="button" (click)="addOption(challenge)">Add option</button>
+    @if (isLoading()) {
+      <p class="admin-note">Loading registered users…</p>
+    } @else if (!users().length) {
+      <p class="admin-note">No registered users are available yet.</p>
+    } @else {
+      <ul class="card-list">
+        @for (user of users(); track user.uid) {
+          <li class="item-card">
+            <div class="item-card__body">
+              <div class="item-card__title">
+                <strong>{{ user.displayName }}</strong>
+                <span class="pill" [class.pill--admin]="user.role === 'admin'">{{
+                  user.role
+                }}</span>
+              </div>
+              <span class="meta">{{ user.email ?? 'No email shared by this provider' }}</span>
+              <span class="meta">Updated {{ user.updatedAt | date: 'medium' }}</span>
             </div>
 
-            <label>
-              Correct answer
-              <input [(ngModel)]="challenge.answer" type="text" />
-            </label>
-            <label>
-              Explanation
-              <textarea [(ngModel)]="challenge.explanation" rows="2"></textarea>
-            </label>
-          }
-        </article>
-      }
-    </div>
-
-    <div>
-      <button type="button" [disabled]="activeLessonId() === draft.id" (click)="saveDraft()">
-        Save draft
-      </button>
-      <button type="button" [disabled]="activeLessonId() === draft.id" (click)="publishDraft()">
-        Publish lesson
-      </button>
-    </div>
-  </div>
-
-  <div>
-    <h3>Existing lessons</h3>
-    @if (isLessonsLoading()) {
-      <p>Loading the lesson workspace…</p>
-    } @else if (!lessons().length) {
-      <p>No lessons have been saved yet.</p>
-    } @else {
-      <ul>
-        @for (lesson of lessons(); track lesson.id) {
-          <li>
-            <strong>{{ lesson.title }}</strong>
-            <div>{{ lessonStatus(lesson) }} · {{ lesson.level }} · {{ lesson.estimatedMinutes }} min</div>
-            <div>Version: {{ lesson.version }}</div>
-            <div>Updated: {{ lesson.updatedAt | date: 'medium' }}</div>
-            <button type="button" (click)="editLesson(lesson)">Edit</button>
-            <button
-              type="button"
-              [disabled]="activeLessonId() === lesson.id"
-              (click)="removeLesson(lesson)"
-            >
-              Remove from learner catalog
-            </button>
-            @if (isEditingLesson(lesson)) {
-              <span>Currently loaded in the editor.</span>
+            @if (isCurrentUser(user)) {
+              <p class="admin-note">
+                Your own access is managed through the backend bootstrap flow.
+              </p>
+            } @else if (user.role === 'learner') {
+              <span class="hint hint--end">
+                <button
+                  class="button button--secondary button--small"
+                  type="button"
+                  [attr.aria-describedby]="'hint-grant-' + user.uid"
+                  [disabled]="activeUserId() === user.uid"
+                  (click)="promote(user)"
+                >
+                  Grant admin access
+                </button>
+                <span
+                  class="hint__bubble"
+                  role="tooltip"
+                  aria-hidden="true"
+                  [id]="'hint-grant-' + user.uid"
+                >
+                  Lets this user manage users and lessons. The backend re-checks your admin role.
+                </span>
+              </span>
+            } @else {
+              <span class="hint hint--end">
+                <button
+                  class="button button--danger button--small"
+                  type="button"
+                  [attr.aria-describedby]="'hint-revoke-' + user.uid"
+                  [disabled]="activeUserId() === user.uid"
+                  (click)="revoke(user)"
+                >
+                  Revoke admin access
+                </button>
+                <span
+                  class="hint__bubble"
+                  role="tooltip"
+                  aria-hidden="true"
+                  [id]="'hint-revoke-' + user.uid"
+                >
+                  Returns this user to the learner role. Their progress is kept.
+                </span>
+              </span>
             }
           </li>
         }
       </ul>
     }
-  </div>
-</section>
+  </section>
+
+  <section class="surface admin-panel" aria-labelledby="admin-lessons-title">
+    <header class="admin-panel__header">
+      <span class="eyebrow">Lesson workspace</span>
+      <h2 id="admin-lessons-title">Create, review, and publish lessons</h2>
+      <p>
+        Generate a lesson draft with AI assistance, review it, then save or publish only after your
+        own edits. Removing a lesson only hides it from the learner catalog and keeps any learner
+        history that already references it.
+      </p>
+    </header>
+
+    @if (lessonFeedback(); as feedbackMessage) {
+      <p class="feedback" [class]="'feedback--' + feedbackMessage.kind" aria-live="polite">
+        {{ feedbackMessage.text }}
+      </p>
+    }
+
+    <div class="subpanel">
+      <h3>AI-assisted draft brief</h3>
+      <div class="field-grid">
+        <label class="field">
+          <span class="field__label">
+            Topic
+            <span class="hint" aria-hidden="true">
+              <span class="hint__icon">?</span>
+              <span class="hint__bubble" role="tooltip" id="hint-topic">
+                The theme the lesson is built around, e.g. “Ordering at a café”.
+              </span>
+            </span>
+          </span>
+          <input [(ngModel)]="generationRequest.topic" type="text" aria-describedby="hint-topic" />
+        </label>
+        <label class="field">
+          <span class="field__label">
+            Learner level
+            <span class="hint" aria-hidden="true">
+              <span class="hint__icon">?</span>
+              <span class="hint__bubble" role="tooltip" id="hint-generation-level">
+                Who the lesson targets, e.g. Beginner or A1. Controls vocabulary difficulty.
+              </span>
+            </span>
+          </span>
+          <input
+            [(ngModel)]="generationRequest.level"
+            type="text"
+            aria-describedby="hint-generation-level"
+          />
+        </label>
+        <label class="field field--wide">
+          <span class="field__label">
+            Learning goals
+            <span class="hint" aria-hidden="true">
+              <span class="hint__icon">?</span>
+              <span class="hint__bubble" role="tooltip" id="hint-goals">
+                What learners should be able to do afterwards. One goal per line works best.
+              </span>
+            </span>
+          </span>
+          <textarea
+            [(ngModel)]="generationRequest.learningGoals"
+            rows="4"
+            aria-describedby="hint-goals"
+          ></textarea>
+        </label>
+      </div>
+      <div class="actions">
+        <span class="hint">
+          <button
+            class="button button--primary"
+            type="button"
+            aria-describedby="hint-generate"
+            [disabled]="isGeneratingLesson()"
+            (click)="generateDraft()"
+          >
+            {{ isGeneratingLesson() ? 'Generating…' : 'Generate lesson draft' }}
+          </button>
+          <span class="hint__bubble" role="tooltip" aria-hidden="true" id="hint-generate">
+            Replaces the editor content with an AI draft. Nothing is saved until you save or
+            publish.
+          </span>
+        </span>
+        <span class="hint">
+          <button
+            class="button button--secondary"
+            type="button"
+            aria-describedby="hint-blank"
+            (click)="startNewLesson()"
+          >
+            Start a blank draft
+          </button>
+          <span class="hint__bubble" role="tooltip" aria-hidden="true" id="hint-blank">
+            Clears the editor so you can write a lesson from scratch.
+          </span>
+        </span>
+      </div>
+    </div>
+
+    @if (draftValidationErrors.length) {
+      <div class="feedback feedback--error" aria-live="polite">
+        <strong>Fix these lesson issues before saving or publishing:</strong>
+        <ul>
+          @for (error of draftValidationErrors; track error) {
+            <li>{{ error }}</li>
+          }
+        </ul>
+      </div>
+    }
+
+    <div class="subpanel">
+      <h3>Lesson editor</h3>
+      <div class="field-grid">
+        <label class="field">
+          <span class="field__label">
+            Title
+            <span class="hint" aria-hidden="true">
+              <span class="hint__icon">?</span>
+              <span class="hint__bubble" role="tooltip" id="hint-title">
+                Shown to learners in the catalog. 3 to 120 characters.
+              </span>
+            </span>
+          </span>
+          <input
+            [(ngModel)]="draft.title"
+            type="text"
+            aria-describedby="hint-title"
+            (blur)="ensureLessonIdFromTitle()"
+          />
+        </label>
+        <label class="field">
+          <span class="field__label">
+            Lesson id
+            <span class="hint" aria-hidden="true">
+              <span class="hint__icon">?</span>
+              <span class="hint__bubble" role="tooltip" id="hint-lesson-id">
+                Permanent identifier used in URLs and progress. Lowercase letters, numbers, and
+                hyphens. Filled from the title when left empty.
+              </span>
+            </span>
+          </span>
+          <input [(ngModel)]="draft.id" type="text" aria-describedby="hint-lesson-id" />
+        </label>
+        <label class="field field--wide">
+          <span class="field__label">
+            Description
+            <span class="hint" aria-hidden="true">
+              <span class="hint__icon">?</span>
+              <span class="hint__bubble" role="tooltip" id="hint-description">
+                Short summary shown under the title. 10 to 280 characters.
+              </span>
+            </span>
+          </span>
+          <textarea
+            [(ngModel)]="draft.description"
+            rows="3"
+            aria-describedby="hint-description"
+          ></textarea>
+        </label>
+        <label class="field">
+          <span class="field__label">
+            Level
+            <span class="hint" aria-hidden="true">
+              <span class="hint__icon">?</span>
+              <span class="hint__bubble" role="tooltip" id="hint-level">
+                Difficulty label displayed to learners, e.g. Beginner.
+              </span>
+            </span>
+          </span>
+          <input [(ngModel)]="draft.level" type="text" aria-describedby="hint-level" />
+        </label>
+        <label class="field">
+          <span class="field__label">
+            Estimated minutes
+            <span class="hint" aria-hidden="true">
+              <span class="hint__icon">?</span>
+              <span class="hint__bubble" role="tooltip" id="hint-minutes">
+                Expected time to finish the lesson, between 1 and 30 minutes.
+              </span>
+            </span>
+          </span>
+          <input
+            [(ngModel)]="draft.estimatedMinutes"
+            type="number"
+            min="1"
+            max="30"
+            aria-describedby="hint-minutes"
+          />
+        </label>
+        <label class="field">
+          <span class="field__label">
+            Admin note
+            <span class="hint" aria-hidden="true">
+              <span class="hint__icon">?</span>
+              <span class="hint__bubble" role="tooltip" id="hint-note">
+                Internal note about the review state of this lesson. 3 to 160 characters.
+              </span>
+            </span>
+          </span>
+          <input [(ngModel)]="draft.demoLabel" type="text" aria-describedby="hint-note" />
+        </label>
+        <label class="field">
+          <span class="field__label">
+            Version
+            <span class="hint" aria-hidden="true">
+              <span class="hint__icon">?</span>
+              <span class="hint__bubble" role="tooltip" id="hint-version">
+                Bump it (e.g. v1 → v2) when you make meaningful content changes.
+              </span>
+            </span>
+          </span>
+          <input [(ngModel)]="draft.version" type="text" aria-describedby="hint-version" />
+        </label>
+      </div>
+
+      <fieldset class="choice-group" aria-describedby="hint-types">
+        <legend class="field__label">
+          Supported challenge types
+          <span class="hint" aria-hidden="true">
+            <span class="hint__icon">?</span>
+            <span class="hint__bubble" role="tooltip" id="hint-types">
+              Formats this lesson may use. At least one stays enabled, and unticking a type removes
+              its challenges.
+            </span>
+          </span>
+        </legend>
+        @for (type of supportedChallengeTypes; track type) {
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              [checked]="draft.supportedChallengeTypes.includes(type)"
+              (change)="toggleSupportedChallengeType(type)"
+            />
+            {{ type }}
+          </label>
+        }
+      </fieldset>
+
+      <div class="subpanel">
+        <div class="challenge__header">
+          <h4>Challenges</h4>
+          <div class="actions">
+            <button
+              class="button button--secondary button--small"
+              type="button"
+              (click)="addFlashcardChallenge()"
+            >
+              Add flashcard
+            </button>
+            <button
+              class="button button--secondary button--small"
+              type="button"
+              (click)="addMultipleChoiceChallenge()"
+            >
+              Add multiple-choice
+            </button>
+          </div>
+        </div>
+
+        @for (challenge of draft.challenges; track challenge.id; let index = $index) {
+          <article class="challenge">
+            <div class="challenge__header">
+              <span class="pill">{{ index + 1 }} · {{ challenge.type }}</span>
+              <button
+                class="button button--danger button--small"
+                type="button"
+                (click)="removeChallenge(index)"
+              >
+                Remove
+              </button>
+            </div>
+
+            <div class="field-grid">
+              <label class="field">
+                <span class="field__label">
+                  Challenge id
+                  <span class="hint" aria-hidden="true">
+                    <span class="hint__icon">?</span>
+                    <span class="hint__bubble" role="tooltip" [id]="'hint-challenge-id-' + index">
+                      Unique within the lesson. Lowercase letters, numbers, and hyphens.
+                    </span>
+                  </span>
+                </span>
+                <input
+                  [(ngModel)]="challenge.id"
+                  type="text"
+                  [attr.aria-describedby]="'hint-challenge-id-' + index"
+                />
+              </label>
+              <label class="field">
+                <span class="field__label">
+                  Prompt
+                  <span class="hint" aria-hidden="true">
+                    <span class="hint__icon">?</span>
+                    <span class="hint__bubble" role="tooltip" [id]="'hint-prompt-' + index">
+                      Instruction shown above the challenge, e.g. “Tap to reveal”.
+                    </span>
+                  </span>
+                </span>
+                <input
+                  [(ngModel)]="challenge.prompt"
+                  type="text"
+                  [attr.aria-describedby]="'hint-prompt-' + index"
+                />
+              </label>
+
+              @if (challenge.type === 'flashcard') {
+                <label class="field">
+                  <span class="field__label">Basque text</span>
+                  <input [(ngModel)]="challenge.basque" type="text" />
+                </label>
+                <label class="field">
+                  <span class="field__label">English text</span>
+                  <input [(ngModel)]="challenge.english" type="text" />
+                </label>
+              } @else {
+                <label class="field field--wide">
+                  <span class="field__label">Question</span>
+                  <input [(ngModel)]="challenge.question" type="text" />
+                </label>
+
+                <div class="options field--wide">
+                  <span class="field__label">
+                    Options
+                    <span class="hint" aria-hidden="true">
+                      <span class="hint__icon">?</span>
+                      <span class="hint__bubble" role="tooltip" [id]="'hint-options-' + index">
+                        Between 2 and 5 choices. One of them must match the correct answer.
+                      </span>
+                    </span>
+                  </span>
+                  @for (option of challenge.options; track $index; let optionIndex = $index) {
+                    <div class="option-row">
+                      <input
+                        class="input"
+                        [(ngModel)]="challenge.options[optionIndex]"
+                        type="text"
+                        [attr.aria-label]="'Option ' + (optionIndex + 1)"
+                        [attr.aria-describedby]="'hint-options-' + index"
+                      />
+                      <button
+                        class="button button--ghost button--small"
+                        type="button"
+                        [disabled]="challenge.options.length <= 2"
+                        (click)="removeOption(challenge, optionIndex)"
+                      >
+                        Remove option
+                      </button>
+                    </div>
+                  }
+                  <div class="actions">
+                    <button
+                      class="button button--secondary button--small"
+                      type="button"
+                      [disabled]="challenge.options.length >= 5"
+                      (click)="addOption(challenge)"
+                    >
+                      Add option
+                    </button>
+                  </div>
+                </div>
+
+                <label class="field">
+                  <span class="field__label">
+                    Correct answer
+                    <span class="hint" aria-hidden="true">
+                      <span class="hint__icon">?</span>
+                      <span class="hint__bubble" role="tooltip" [id]="'hint-answer-' + index">
+                        Must be an exact copy of one of the options above.
+                      </span>
+                    </span>
+                  </span>
+                  <input
+                    [(ngModel)]="challenge.answer"
+                    type="text"
+                    [attr.aria-describedby]="'hint-answer-' + index"
+                  />
+                </label>
+                <label class="field">
+                  <span class="field__label">
+                    Explanation
+                    <span class="hint" aria-hidden="true">
+                      <span class="hint__icon">?</span>
+                      <span class="hint__bubble" role="tooltip" [id]="'hint-explanation-' + index">
+                        Shown after answering to explain why the answer is correct.
+                      </span>
+                    </span>
+                  </span>
+                  <textarea
+                    [(ngModel)]="challenge.explanation"
+                    rows="2"
+                    [attr.aria-describedby]="'hint-explanation-' + index"
+                  ></textarea>
+                </label>
+              }
+            </div>
+          </article>
+        }
+      </div>
+
+      <div class="actions actions--end">
+        <span class="hint hint--end">
+          <button
+            class="button button--secondary"
+            type="button"
+            aria-describedby="hint-save"
+            [disabled]="activeLessonId() === draft.id"
+            (click)="saveDraft()"
+          >
+            Save draft
+          </button>
+          <span class="hint__bubble" role="tooltip" aria-hidden="true" id="hint-save">
+            Saves without publishing. Learners won’t see this version yet.
+          </span>
+        </span>
+        <span class="hint hint--end">
+          <button
+            class="button button--primary"
+            type="button"
+            aria-describedby="hint-publish"
+            [disabled]="activeLessonId() === draft.id"
+            (click)="publishDraft()"
+          >
+            Publish lesson
+          </button>
+          <span class="hint__bubble" role="tooltip" aria-hidden="true" id="hint-publish">
+            Saves and makes the lesson visible in the learner catalog.
+          </span>
+        </span>
+      </div>
+    </div>
+
+    <div class="subpanel">
+      <h3>Existing lessons</h3>
+      @if (isLessonsLoading()) {
+        <p class="admin-note">Loading the lesson workspace…</p>
+      } @else if (!lessons().length) {
+        <p class="admin-note">No lessons have been saved yet.</p>
+      } @else {
+        <ul class="card-list">
+          @for (lesson of lessons(); track lesson.id) {
+            <li class="item-card" [class.item-card--active]="isEditingLesson(lesson)">
+              <div class="item-card__body">
+                <div class="item-card__title">
+                  <strong>{{ lesson.title }}</strong>
+                  <span class="pill" [class]="'pill--' + (lessonStatus(lesson) | lowercase)">{{
+                    lessonStatus(lesson)
+                  }}</span>
+                </div>
+                <span class="meta">
+                  {{ lesson.level }} · {{ lesson.estimatedMinutes }} min · {{ lesson.version }}
+                </span>
+                <span class="meta">Updated {{ lesson.updatedAt | date: 'medium' }}</span>
+                @if (isEditingLesson(lesson)) {
+                  <span class="meta">Currently loaded in the editor.</span>
+                }
+              </div>
+              <div class="actions">
+                <button
+                  class="button button--secondary button--small"
+                  type="button"
+                  (click)="editLesson(lesson)"
+                >
+                  Edit
+                </button>
+                <span class="hint hint--end">
+                  <button
+                    class="button button--danger button--small"
+                    type="button"
+                    [attr.aria-describedby]="'hint-remove-' + lesson.id"
+                    [disabled]="activeLessonId() === lesson.id"
+                    (click)="removeLesson(lesson)"
+                  >
+                    Remove from learner catalog
+                  </button>
+                  <span
+                    class="hint__bubble"
+                    role="tooltip"
+                    aria-hidden="true"
+                    [id]="'hint-remove-' + lesson.id"
+                  >
+                    Hides the lesson from learners. The lesson and any learner progress are kept.
+                  </span>
+                </span>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </section>
+</div>

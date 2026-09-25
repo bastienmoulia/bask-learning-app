@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, LowerCasePipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
@@ -22,9 +22,10 @@ import {
 
 @Component({
   selector: 'app-admin',
-  imports: [DatePipe, FormsModule],
+  imports: [DatePipe, FormsModule, LowerCasePipe],
   standalone: true,
   templateUrl: './admin.html',
+  styleUrl: './admin.css',
 })
 export class AdminComponent {
   private readonly authService = inject(AuthService);

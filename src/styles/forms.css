@@ -1,0 +1,175 @@
+.field-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field--wide {
+  grid-column: 1 / -1;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+  position: relative;
+}
+
+.field__label {
+  align-items: center;
+  color: var(--color-text-secondary);
+  display: flex;
+  font-size: 0.9rem;
+  font-weight: 700;
+  gap: 0.4rem;
+}
+
+.field input:not([type='checkbox'], [type='radio']),
+.field textarea,
+.field select,
+.input {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font: inherit;
+  padding: 0.75rem 0.9rem;
+  width: 100%;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.field input:focus-visible,
+.field textarea:focus-visible,
+.field select:focus-visible,
+.input:focus-visible {
+  border-color: var(--color-primary-mid);
+  outline: 3px solid var(--color-surface-correct);
+}
+
+.choice-group {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin: 0;
+  padding: 0.75rem 1rem 1rem;
+}
+
+.choice-group legend {
+  padding: 0 0.35rem;
+}
+
+.checkbox {
+  align-items: center;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.checkbox input {
+  accent-color: var(--color-primary);
+  height: 1.1rem;
+  width: 1.1rem;
+}
+
+.hint {
+  display: inline-flex;
+  position: relative;
+}
+
+.hint__icon {
+  align-items: center;
+  background: var(--color-surface-soft);
+  border-radius: 50%;
+  color: var(--color-text-tertiary);
+  cursor: help;
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-weight: 700;
+  height: 1.15rem;
+  justify-content: center;
+  width: 1.15rem;
+}
+
+.hint__bubble {
+  background: var(--color-text);
+  border-radius: 0.6rem;
+  bottom: calc(100% + 0.5rem);
+  box-shadow: var(--shadow-card);
+  color: var(--color-on-primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  left: -0.425rem;
+  letter-spacing: normal;
+  line-height: 1.4;
+  max-width: min(18rem, 80vw);
+  opacity: 0;
+  padding: 0.55rem 0.75rem;
+  pointer-events: none;
+  position: absolute;
+  text-align: left;
+  text-transform: none;
+  transform: translateY(0.25rem);
+  visibility: hidden;
+  width: max-content;
+  z-index: 10;
+}
+
+.hint__bubble::after {
+  border: 0.35rem solid transparent;
+  border-top-color: var(--color-text);
+  content: '';
+  left: 0.65rem;
+  position: absolute;
+  top: 100%;
+}
+
+.hint--end .hint__bubble {
+  left: auto;
+  right: 0;
+}
+
+.hint--end .hint__bubble::after {
+  left: auto;
+  right: 1rem;
+}
+
+/* Anchor field hints to the field width so they never overflow the grid column. */
+.field .hint {
+  position: static;
+}
+
+.field .hint__bubble {
+  left: 0;
+  max-width: 100%;
+}
+
+.field .hint__bubble::after {
+  display: none;
+}
+
+.hint:hover .hint__bubble,
+.hint:focus-within .hint__bubble,
+.field:focus-within .hint__bubble {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hint__bubble {
+    transition:
+      opacity var(--transition-fast),
+      transform var(--transition-fast),
+      visibility var(--transition-fast);
+  }
+}
+
+@media (max-width: 640px) {
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+}
