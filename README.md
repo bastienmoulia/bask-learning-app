@@ -105,6 +105,9 @@ Functions environment, provide a `GEMINI_API_KEY` secret or environment variable
 runtime. Without it, the admin screen still returns a structured reviewable draft scaffold instead of
 a live AI response.
 
+The admin callable functions are configured for the `europe-west1` region. If you change that
+region, keep `src/environments/environment.ts` and `functions/src/index.js` in sync.
+
 ### App Check and personalized practice
 
 Personalized practice is optional and only runs when:

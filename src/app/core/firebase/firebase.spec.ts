@@ -1,5 +1,11 @@
 import { deleteApp } from 'firebase/app';
-import { defaultFirebaseAppName, getFirebaseServices, hasFirebaseConfig } from './firebase';
+import {
+  defaultFirebaseAppName,
+  defaultFunctionsRegion,
+  getFirebaseServices,
+  getFunctionsRegion,
+  hasFirebaseConfig,
+} from './firebase';
 
 describe('firebase helpers', () => {
   it('detects when required Firebase values are missing', () => {
@@ -33,6 +39,11 @@ describe('firebase helpers', () => {
     expect(services.appCheckEnabled).toBe(false);
   });
 
+  it('uses the configured EU Cloud Functions region by default', () => {
+    expect(getFunctionsRegion('europe-west1')).toBe('europe-west1');
+    expect(getFunctionsRegion('')).toBe(defaultFunctionsRegion);
+  });
+
   it('initializes Firebase services when a complete config is provided', async () => {
     const appName = 'bask-learning-app-test';
     const services = getFirebaseServices(
@@ -51,6 +62,7 @@ describe('firebase helpers', () => {
     expect(services.auth).not.toBeNull();
     expect(services.firestore).not.toBeNull();
     expect(services.functions).not.toBeNull();
+    expect(services.functions?.region).toBe(defaultFunctionsRegion);
     expect(services.appCheckEnabled).toBe(false);
 
     await deleteApp(services.app!);
